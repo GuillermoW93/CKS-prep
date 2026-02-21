@@ -1,0 +1,17 @@
+3. Falco Rules
+
+Edit /etc/falco/falco_rules.local.yaml:
+Add the following custom rule:
+
+YAML
+- rule: Detect Shadow File Read
+  desc: Alert when /etc/shadow is read
+  condition: open_read and fd.name = "/etc/shadow"
+  output: "Warning: /etc/shadow was read (user=%user.name command=%proc.cmdline)"
+  priority: WARNING
+  tags: [filesystem, mitre_credential_access]
+Apply the changes:
+
+Bash
+# Restart the Falco service to load the new rule
+systemctl restart falco

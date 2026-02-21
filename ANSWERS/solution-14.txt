@@ -1,0 +1,42 @@
+14. etcd Encryption at Rest
+
+Just like the Admission Controller, you must mount the encryption config file into the kube-apiserver pod.
+
+Edit /etc/kubernetes/manifests/kube-apiserver.yaml:
+
+Update the command arguments:
+
+YAML
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --encryption-provider-config=/etc/kubernetes/etcd-encryption.yaml
+    # ... existing flags ...
+Add the Volume Mount:
+
+YAML
+    volumeMounts:
+    - mountPath: /etc/kubernetes/etcd-encryption.yaml
+      name: etcd-encryption
+      readOnly: true
+Add the Volume:
+
+YAML
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/etcd-encryption.yaml
+      type: FileOrCreate
+    name: etcd-encryption
+Verify the encryption (Query etcd directly):
+
+Bash
+# Create a dummy secret
+kubectl create secret generic test-secret --from-literal=key1=supersecret
+
+# Read directly from etcd to verify it is encrypted (Look for k8s:enc:aescbc:v1)
+ETCDCTL_API=3 etcdctl get /registry/secrets/default/test-secret \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt \
+  --cert=/etc/kubernetes/pki/etcd/server.crt \
+  --key=/etc/kubernetes/pki/etcd/server.key

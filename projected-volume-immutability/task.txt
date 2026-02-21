@@ -1,0 +1,29 @@
+Create a ServiceAccount and Pod setup file (strict-pod.yaml):
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vault-sa
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: immutable-pod
+spec:
+  serviceAccountName: vault-sa
+  containers:
+  - name: app
+    image: busybox:1.36
+    command: ["sleep", "3600"]
+
+----
+
+The Task:
+
+Modify the vault-sa ServiceAccount to not automount the API token by default.
+
+Modify the immutable-pod to run with a readOnlyRootFilesystem: true and runAsNonRoot: true.
+
+Manually mount the vault-sa token into the pod using a Projected Volume at the path /var/run/secrets/kubernetes.io/serviceaccount/token.
+
+Create an emptyDir volume and mount it at /tmp so the container can still write temporary files despite the read-only root.

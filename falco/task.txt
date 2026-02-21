@@ -1,0 +1,12 @@
+3. Falco Rules
+
+Setup Files:
+Assume Falco is installed as a systemd service on your worker node.
+
+The Task:
+
+Create a custom rule in /etc/falco/falco_rules.local.yaml that triggers a WARNING when any process reads the /etc/shadow file.
+
+Reload the Falco service.
+
+Exec into a pod, run cat /etc/shadow, and verify the alert appears in /var/log/syslog or /var/log/falco.log.

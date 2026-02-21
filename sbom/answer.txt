@@ -1,0 +1,6 @@
+kubectl get pods -n encrypted -l app=alpha -o jsonpath='{.items[0].status.containerStatuses[0].imageID}'
+docker.io/istio/proxyv2@sha256:2d0090762c124e23294c4a3de023d98c7350d924ef0e37b14e80f6c8a755224f
+
+syft docker.io/istio/proxyv2@sha256:2d0090762c124e23294c4a3de023d98c7350d924ef0e37b14e80f6c8a755224f -o cyclonedx-json > istio-proxy.json
+
+trivy image docker.io/istio/proxyv2@sha256:2d0090762c124e23294c4a3de023d98c7350d924ef0e37b14e80f6c8a755224f -o cyclonedx-json > istio-proxy.json

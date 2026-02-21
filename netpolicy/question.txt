@@ -1,0 +1,13 @@
+A pod called redis-backend has been created in the prod-x12cs namespace. It has been exposed as a service of type ClusterIP. The pod listens on TCP port 6379.
+
+Create a network policy called allow-redis-access to lock down access to this pod only for the following:
+
+Any pod in the same namespace with the label backend=prod-x12cs
+
+All pods in the prod-yx13cs namespace
+
+Ensure that traffic is only allowed on TCP port 6379.
+
+All other incoming connections should be blocked.
+
+Use the existing labels when creating the network policy.

@@ -1,0 +1,32 @@
+4. Fix Dockerfile and Deployment Vulnerabilities
+
+The Corrected Dockerfile:
+
+Dockerfile
+# 1. Use a specific tag, not 'latest'
+FROM ubuntu:24.04 
+
+# 2. Create a non-root user and group
+RUN groupadd -r appgroup && useradd -r -g appgroup appuser
+
+RUN apt-get update && apt-get install -y curl
+
+# 3. Use COPY instead of ADD (prevents auto-extraction and remote URL fetching)
+COPY app.tar.gz /opt/app/
+RUN chown -R appuser:appgroup /opt/app/
+
+# 4. Set the non-root user
+USER appuser
+CMD ["/opt/app/run.sh"]
+The Corrected deployment.yaml Security Context:
+
+YAML
+      containers:
+      - name: app
+        image: myregistry/vulnerable-app:1.0 # Pinned tag
+        securityContext:
+          privileged: false
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL

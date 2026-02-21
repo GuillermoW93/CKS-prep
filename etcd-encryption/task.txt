@@ -1,0 +1,27 @@
+Generate a base64 encoded secret for your key:
+
+head -c 32 /dev/urandom | base64
+
+Create a file /etc/kubernetes/etcd-encryption.yaml (using the base64 string you just generated):
+
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+      - secrets
+    providers:
+      - aescbc:
+          keys:
+            - name: key1
+              secret: <YOUR_BASE64_STRING_HERE>
+      - identity: {}
+
+----
+
+The Task:
+
+Configure the kube-apiserver to use this encryption configuration file.
+
+Restart the API server.
+
+Create a new secret in Kubernetes, then query etcd directly using etcdctl to verify that the secret data is encrypted (you should see k8s:enc:aescbc:v1 in the raw etcd output).

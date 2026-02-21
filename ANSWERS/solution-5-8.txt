@@ -1,0 +1,29 @@
+5 & 8. AppArmor, Seccomp Profiles, and Pod Security Standard
+
+1. Load the AppArmor Profile (On the Worker Node):
+
+Bash
+apparmor_parser -q /path/to/secure-profile
+2. Enforce Pod Security Standard (On the Master Node):
+
+Bash
+kubectl label namespace secured-area pod-security.kubernetes.io/enforce=restricted
+3. The Corrected secure-pod.yaml:
+
+YAML
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-nginx
+  namespace: secured-area
+  annotations:
+    # 1. Apply the AppArmor profile
+    container.apparmor.security.beta.kubernetes.io/nginx: localhost/secure-profile
+spec:
+  # 2. Apply the Seccomp profile
+  securityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+  - name: nginx
+    image: nginx:1.25.2

@@ -1,0 +1,7 @@
+The Task:
+
+Drain your worker node (cks-worker) securely.
+
+Upgrade kubeadm, kubelet, and kubectl on the worker node to the next available minor/patch version (e.g., v1.30.x to v1.31.x, depending on your current install).
+
+Uncordon the node.

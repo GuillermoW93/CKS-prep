@@ -1,0 +1,11 @@
+Create a directory /etc/kubernetes/admission and add this configuration file (admission-config.yaml)
+
+
+----
+TASK:
+
+* Enable the ImagePolicyWebhook and NodeRestriction admission controllers on your API server.
+
+* Point the API server to the admission-config.yaml file you just created.
+
+* Ensure the API server restarts successfully (it will fail to deploy new pods because the dummy webhook will block them, which means you configured it correctly!).

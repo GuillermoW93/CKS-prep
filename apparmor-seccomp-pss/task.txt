@@ -1,0 +1,38 @@
+Create an AppArmor profile file secure-profile on your worker node:
+
+Plaintext
+#include <tunables/global>
+profile secure-profile flags=(attach_disconnected) {
+  #include <abstractions/base>
+  file,
+  deny /bin/sh mrwklx,
+}
+
+Create a namespace file secure-ns.yaml:
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: secured-area
+
+Create a pod file secure-pod.yaml:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-nginx
+  namespace: secured-area
+spec:
+  containers:
+  - name: nginx
+    image: nginx:1.25.2
+
+----
+
+The Task:
+
+Load the AppArmor profile onto your worker node using apparmor_parser.
+
+Label the secured-area namespace to enforce the restricted Pod Security Standard.
+
+Modify the secure-pod.yaml to use the RuntimeDefault seccomp profile and your custom localhost/secure-profile AppArmor profile.

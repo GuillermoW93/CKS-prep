@@ -1,0 +1,11 @@
+11. Validating Binaries with sha512sum
+
+Commands:
+
+Bash
+# 1. Generate the hash and save it to a file
+sha512sum /etc/kubernetes/manifests/kube-apiserver.yaml > apiserver.hash
+
+# 2. Check the file against the hash to ensure it hasn't been tampered with
+sha512sum -c apiserver.hash
+(If the file was modified, the output will say FAILED.)

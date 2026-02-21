@@ -1,0 +1,7 @@
+The Task:
+
+Kube-bench: Run kube-bench on your master node. Identify the failing test related to the kubelet's --anonymous-auth setting. Fix the kubelet configuration to resolve the failure.
+
+Binary Validation: Run sha512sum /etc/kubernetes/manifests/kube-apiserver.yaml and compare it to a known good hash (for practice, just generate the hash, save it to a file, modify the manifest slightly, and observe how the hash changes to simulate tampering).
+
+Malicious Processes: Use crictl or ps on your worker node to find a container running a process called sys_ptrace or cryptominer. Stop and remove that specific container.

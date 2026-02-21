@@ -1,0 +1,15 @@
+7. Check Syscalls and Remove Malicious Container
+
+If you suspect a container is running a cryptominer or malicious process, use crictl (the CLI for containerd).
+
+Commands (On the Worker Node):
+
+Bash
+# List all running containers to find the suspect
+crictl ps
+
+# Stop the malicious container (replace with actual ID)
+crictl stop 1a2b3c4d5e6f
+
+# Remove the container
+crictl rm 1a2b3c4d5e6f

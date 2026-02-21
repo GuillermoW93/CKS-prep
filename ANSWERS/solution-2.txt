@@ -1,0 +1,33 @@
+2. Upgrade the Node to a Newer Version (kubeadm)
+
+Run these exact commands to safely upgrade a worker node (assuming an upgrade to a 1.31.x version as an example).
+
+On the Master Node:
+
+Bash
+kubectl drain cks-worker --ignore-daemonsets --force
+On the Worker Node (cks-worker):
+
+Bash
+# Unhold packages
+apt-mark unhold kubeadm kubelet kubectl
+
+# Update kubeadm first
+apt-get update && apt-get install -y kubeadm='1.31.*'
+
+# Upgrade the node configuration
+kubeadm upgrade node
+
+# Update kubelet and kubectl
+apt-get install -y kubelet='1.31.*' kubectl='1.31.*'
+
+# Restart the kubelet
+systemctl daemon-reload
+systemctl restart kubelet
+
+# Put packages back on hold
+apt-mark hold kubeadm kubelet kubectl
+On the Master Node:
+
+Bash
+kubectl uncordon cks-worker

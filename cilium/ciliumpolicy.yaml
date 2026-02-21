@@ -1,0 +1,13 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: p1
+  namespace: team-azure
+spec:
+  endpointSelector:
+    matchLabels:
+      role: messenger
+  egressDeny:
+  - toEndpoints:
+    - matchLabels:
+        role: database

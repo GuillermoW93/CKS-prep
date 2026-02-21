@@ -1,0 +1,192 @@
+
+Report Summary
+
+┌──────────────────────────────────────────────────────────────────────────────────┬──────────┬─────────────────┬─────────┐
+│                                      Target                                      │   Type   │ Vulnerabilities │ Secrets │
+├──────────────────────────────────────────────────────────────────────────────────┼──────────┼─────────────────┼─────────┤
+│ docker.io/istio/proxyv2@sha256:2d0090762c124e23294c4a3de023d98c7350d924ef0e37b1- │  ubuntu  │       37        │    -    │
+│ 4e80f6c8a755224f (ubuntu 24.04)                                                  │          │                 │         │
+├──────────────────────────────────────────────────────────────────────────────────┼──────────┼─────────────────┼─────────┤
+│ usr/local/bin/pilot-agent                                                        │ gobinary │        6        │    -    │
+└──────────────────────────────────────────────────────────────────────────────────┴──────────┴─────────────────┴─────────┘
+Legend:
+- '-': Not scanned
+- '0': Clean (no security findings detected)
+
+
+docker.io/istio/proxyv2@sha256:2d0090762c124e23294c4a3de023d98c7350d924ef0e37b14e80f6c8a755224f (ubuntu 24.04)
+==============================================================================================================
+Total: 37 (UNKNOWN: 0, LOW: 26, MEDIUM: 11, HIGH: 0, CRITICAL: 0)
+
+┌────────────────────┬────────────────┬──────────┬──────────┬─────────────────────────┬────────────────────┬──────────────────────────────────────────────────────────────┐
+│      Library       │ Vulnerability  │ Severity │  Status  │    Installed Version    │   Fixed Version    │                            Title                             │
+├────────────────────┼────────────────┼──────────┼──────────┼─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ coreutils          │ CVE-2016-2781  │ LOW      │ affected │ 9.4-3ubuntu6.1          │                    │ coreutils: Non-privileged session can escape to the parent   │
+│                    │                │          │          │                         │                    │ session in chroot                                            │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2016-2781                    │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ curl               │ CVE-2025-0167  │          │          │ 8.5.0-2ubuntu10.6       │                    │ When asked to use a `.netrc` file for credentials **and** to │
+│                    │                │          │          │                         │                    │ follow...                                                    │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-0167                    │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-10148 │          │          │                         │                    │ curl: predictable WebSocket mask                             │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-10148                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-14524 │          │          │                         │                    │ When an OAuth2 bearer token is used for an HTTP(S) transfer, │
+│                    │                │          │          │                         │                    │ and...                                                       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-14524                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-14819 │          │          │                         │                    │ When doing TLS related transfers with reused easy or multi   │
+│                    │                │          │          │                         │                    │ handles and...                                               │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-14819                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-15079 │          │          │                         │                    │ When doing SSH-based transfers using either SCP or SFTP, and │
+│                    │                │          │          │                         │                    │ setting t...                                                 │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-15079                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-15224 │          │          │                         │                    │ When doing SSH-based transfers using either SCP or SFTP, and │
+│                    │                │          │          │                         │                    │ asked to...                                                  │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-15224                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-9086  │          │          │                         │                    │ curl: libcurl: Curl out of bounds read for cookie path       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-9086                    │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ gpgv               │ CVE-2025-68972 │ MEDIUM   │          │ 2.4.4-2ubuntu17.4       │                    │ gnupg: GnuPG: Signature bypass via form feed character in    │
+│                    │                │          │          │                         │                    │ signed messages                                              │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-68972                   │
+│                    ├────────────────┼──────────┤          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2022-3219  │ LOW      │          │                         │                    │ gnupg: denial of service issue (resource consumption) using  │
+│                    │                │          │          │                         │                    │ compressed packets                                           │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2022-3219                    │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libbpf1            │ CVE-2025-29481 │          │          │ 1:1.3.0-2build2         │                    │ libbpf: Heap Buffer Overflow in libbpf                       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-29481                   │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libcurl4t64        │ CVE-2025-0167  │          │          │ 8.5.0-2ubuntu10.6       │                    │ When asked to use a `.netrc` file for credentials **and** to │
+│                    │                │          │          │                         │                    │ follow...                                                    │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-0167                    │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-10148 │          │          │                         │                    │ curl: predictable WebSocket mask                             │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-10148                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-14524 │          │          │                         │                    │ When an OAuth2 bearer token is used for an HTTP(S) transfer, │
+│                    │                │          │          │                         │                    │ and...                                                       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-14524                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-14819 │          │          │                         │                    │ When doing TLS related transfers with reused easy or multi   │
+│                    │                │          │          │                         │                    │ handles and...                                               │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-14819                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-15079 │          │          │                         │                    │ When doing SSH-based transfers using either SCP or SFTP, and │
+│                    │                │          │          │                         │                    │ setting t...                                                 │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-15079                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-15224 │          │          │                         │                    │ When doing SSH-based transfers using either SCP or SFTP, and │
+│                    │                │          │          │                         │                    │ asked to...                                                  │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-15224                   │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-9086  │          │          │                         │                    │ curl: libcurl: Curl out of bounds read for cookie path       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-9086                    │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libelf1t64         │ CVE-2025-1352  │          │          │ 0.190-1.1ubuntu0.1      │                    │ elfutils: GNU elfutils eu-readelf libdw_alloc.c              │
+│                    │                │          │          │                         │                    │ __libdw_thread_tail memory corruption                        │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-1352                    │
+│                    ├────────────────┤          │          │                         ├────────────────────┼──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-1376  │          │          │                         │                    │ elfutils: GNU elfutils eu-strip elf_strptr.c elf_strptr      │
+│                    │                │          │          │                         │                    │ denial of service                                            │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-1376                    │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libgcrypt20        │ CVE-2024-2236  │          │          │ 1.10.3-2build1          │                    │ libgcrypt: vulnerable to Marvin Attack                       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2024-2236                    │
+├────────────────────┼────────────────┼──────────┼──────────┼─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libgnutls30t64     │ CVE-2025-14831 │ MEDIUM   │ fixed    │ 3.8.3-1.1ubuntu3.4      │ 3.8.3-1.1ubuntu3.5 │ gnutls: GnuTLS: Denial of Service via excessive resource     │
+│                    │                │          │          │                         │                    │ consumption during certificate verification...               │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-14831                   │
+│                    ├────────────────┼──────────┤          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-9820  │ LOW      │          │                         │                    │ gnutls: Stack-based Buffer Overflow in                       │
+│                    │                │          │          │                         │                    │ gnutls_pkcs11_token_init() Function                          │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-9820                    │
+├────────────────────┼────────────────┼──────────┼──────────┼─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ liblmdb0           │ CVE-2026-22185 │ MEDIUM   │ affected │ 0.9.31-1build1          │                    │ OpenLDAP: OpenLDAP LMDB: Denial of Service and Information   │
+│                    │                │          │          │                         │                    │ Disclosure via Heap Buffer...                                │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-22185                   │
+├────────────────────┼────────────────┤          │          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libpam-modules     │ CVE-2025-8941  │          │          │ 1.5.3-5ubuntu5.5        │                    │ linux-pam: Incomplete fix for CVE-2025-6020                  │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-8941                    │
+├────────────────────┤                │          │          │                         ├────────────────────┤                                                              │
+│ libpam-modules-bin │                │          │          │                         │                    │                                                              │
+│                    │                │          │          │                         │                    │                                                              │
+├────────────────────┤                │          │          │                         ├────────────────────┤                                                              │
+│ libpam-runtime     │                │          │          │                         │                    │                                                              │
+│                    │                │          │          │                         │                    │                                                              │
+├────────────────────┤                │          │          │                         ├────────────────────┤                                                              │
+│ libpam0g           │                │          │          │                         │                    │                                                              │
+│                    │                │          │          │                         │                    │                                                              │
+├────────────────────┼────────────────┤          ├──────────┼─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ libssh-4           │ CVE-2026-0964  │          │ fixed    │ 0.10.6-2ubuntu0.2       │ 0.10.6-2ubuntu0.3  │ libssh: Improper sanitation of paths received from SCP       │
+│                    │                │          │          │                         │                    │ servers                                                      │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-0964                    │
+│                    ├────────────────┤          │          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2026-0967  │          │          │                         │                    │ libssh: libssh: Denial of Service via inefficient regular    │
+│                    │                │          │          │                         │                    │ expression processing                                        │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-0967                    │
+│                    ├────────────────┤          │          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2026-0968  │          │          │                         │                    │ libssh: libssh: Denial of Service due to malformed SFTP      │
+│                    │                │          │          │                         │                    │ message                                                      │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-0968                    │
+│                    ├────────────────┼──────────┤          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2025-8277  │ LOW      │          │                         │                    │ libssh: Memory Exhaustion via Repeated Key Exchange in       │
+│                    │                │          │          │                         │                    │ libssh                                                       │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-8277                    │
+│                    ├────────────────┤          │          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2026-0965  │          │          │                         │                    │ libssh: libssh: Denial of Service via improper configuration │
+│                    │                │          │          │                         │                    │ file handling                                                │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-0965                    │
+│                    ├────────────────┤          │          │                         │                    ├──────────────────────────────────────────────────────────────┤
+│                    │ CVE-2026-0966  │          │          │                         │                    │ libssh: Buffer underflow in ssh_get_hexa() on invalid input  │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2026-0966                    │
+├────────────────────┼────────────────┤          ├──────────┼─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ login              │ CVE-2024-56433 │          │ affected │ 1:4.13+dfsg1-4ubuntu3.2 │                    │ shadow-utils: Default subordinate ID configuration in        │
+│                    │                │          │          │                         │                    │ /etc/login.defs could lead to compromise                     │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2024-56433                   │
+├────────────────────┤                │          │          │                         ├────────────────────┤                                                              │
+│ passwd             │                │          │          │                         │                    │                                                              │
+│                    │                │          │          │                         │                    │                                                              │
+│                    │                │          │          │                         │                    │                                                              │
+├────────────────────┼────────────────┼──────────┤          ├─────────────────────────┼────────────────────┼──────────────────────────────────────────────────────────────┤
+│ tar                │ CVE-2025-45582 │ MEDIUM   │          │ 1.35+dfsg-3build1       │                    │ tar: Tar path traversal                                      │
+│                    │                │          │          │                         │                    │ https://avd.aquasec.com/nvd/cve-2025-45582                   │
+└────────────────────┴────────────────┴──────────┴──────────┴─────────────────────────┴────────────────────┴──────────────────────────────────────────────────────────────┘
+
+usr/local/bin/pilot-agent (gobinary)
+====================================
+Total: 6 (UNKNOWN: 0, LOW: 0, MEDIUM: 2, HIGH: 4, CRITICAL: 0)
+
+┌────────────────────────────────────────┬────────────────┬──────────┬────────┬────────────────────────────────────┬─────────────────────────┬──────────────────────────────────────────────────────────────┐
+│                Library                 │ Vulnerability  │ Severity │ Status │         Installed Version          │      Fixed Version      │                            Title                             │
+├────────────────────────────────────────┼────────────────┼──────────┼────────┼────────────────────────────────────┼─────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ github.com/containernetworking/plugins │ CVE-2025-67499 │ MEDIUM   │ fixed  │ v1.7.1                             │ 1.9.0                   │ CNI portmap plugin:                                          │
+│                                        │                │          │        │                                    │                         │ github.com/containernetworking/plugins/plugins/meta/portmap: │
+│                                        │                │          │        │                                    │                         │ CNI portmap plugin: HostPort forwarding vulnerability allows │
+│                                        │                │          │        │                                    │                         │ traffic...                                                   │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2025-67499                   │
+├────────────────────────────────────────┼────────────────┼──────────┤        ├────────────────────────────────────┼─────────────────────────┼──────────────────────────────────────────────────────────────┤
+│ istio.io/istio                         │ CVE-2019-14993 │ HIGH     │        │ v0.0.0-20260211003324-2300e2458ab7 │ 1.1.13, 1.2.4           │ istio/envoy: mishandling regular expressions for long URIs   │
+│                                        │                │          │        │                                    │                         │ leading to DoS                                               │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2019-14993                   │
+│                                        ├────────────────┤          │        │                                    ├─────────────────────────┼──────────────────────────────────────────────────────────────┤
+│                                        │ CVE-2021-39155 │          │        │                                    │ 1.9.8, 1.10.4, 1.11.1   │ istio/istio: HTTP request can bypass authorization           │
+│                                        │                │          │        │                                    │                         │ mechanisms due to case insensitive host...                   │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2021-39155                   │
+│                                        ├────────────────┤          │        │                                    │                         ├──────────────────────────────────────────────────────────────┤
+│                                        │ CVE-2021-39156 │          │        │                                    │                         │ istio/istio: HTTP request with fragment in URI can bypass    │
+│                                        │                │          │        │                                    │                         │ authorization mechanisms                                     │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2021-39156                   │
+│                                        ├────────────────┤          │        │                                    ├─────────────────────────┼──────────────────────────────────────────────────────────────┤
+│                                        │ CVE-2022-23635 │          │        │                                    │ 1.13.1, 1.12.4, 1.11.7  │ istio: unauthenticated control plane denial of service       │
+│                                        │                │          │        │                                    │                         │ attack                                                       │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2022-23635                   │
+│                                        ├────────────────┼──────────┤        │                                    ├─────────────────────────┼──────────────────────────────────────────────────────────────┤
+│                                        │ CVE-2022-31045 │ MEDIUM   │        │                                    │ 1.12.18, 1.13.5, 1.14.1 │ Istio: Unsafe memory access in metadata exchange.            │
+│                                        │                │          │        │                                    │                         │ https://avd.aquasec.com/nvd/cve-2022-31045                   │
+└────────────────────────────────────────┴────────────────┴──────────┴────────┴────────────────────────────────────┴─────────────────────────┴──────────────────────────────────────────────────────────────┘

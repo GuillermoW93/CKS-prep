@@ -1,0 +1,34 @@
+1. Admission Controller (NodeRestriction & ImagePolicyWebhook)
+
+To enable these, you must edit the API server static pod manifest and ensure the configuration files are mounted into the pod.
+
+Edit /etc/kubernetes/manifests/kube-apiserver.yaml:
+
+Update the command arguments:
+
+YAML
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+    - --admission-control-config-file=/etc/kubernetes/admission/admission-config.yaml
+    # ... existing flags ...
+Add the Volume Mount (inside the container spec):
+
+YAML
+    volumeMounts:
+    - mountPath: /etc/kubernetes/admission
+      name: admission-config
+      readOnly: true
+    # ... existing mounts ...
+Add the Volume (inside the pod spec):
+
+YAML
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/admission
+      type: DirectoryOrCreate
+    name: admission-config
+  # ... existing volumes ...
+(The API server pod will automatically restart when you save the file.)

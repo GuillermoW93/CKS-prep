@@ -1,0 +1,16 @@
+6. Kube-bench & Fixing CIS Benchmarks
+
+If kube-bench fails because the Kubelet allows anonymous authentication, you must disable it.
+
+Edit /var/lib/kubelet/config.yaml (On the Node):
+Change enabled to false under authentication.anonymous:
+
+YAML
+authentication:
+  anonymous:
+    enabled: false
+Restart the Kubelet:
+
+Bash
+systemctl daemon-reload
+systemctl restart kubelet
