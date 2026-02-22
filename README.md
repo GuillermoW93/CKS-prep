@@ -1,6 +1,6 @@
-# CKS Mock Exam Preparation Lab ☸️
+# CKS Practice Pack #2026
 
-This repository contains a collection of practical, hands-on scenarios designed to help you prepare for the **Certified Kubernetes Security Specialist (CKS)** exam. 
+This repository contains a collection of practical, hands-on scenarios designed to help you prepare for the **Certified Kubernetes Security Specialist (CKS)** exam ☸️
 
 These exercises are built for a self-hosted `kubeadm` cluster (e.g., running on Proxmox with Istio/Cilium) and cover the core domains of the CKS curriculum, from cluster setup and hardening to runtime security.
 
