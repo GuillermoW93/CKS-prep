@@ -1,0 +1,51 @@
+openssl genrsa -out 60099.key 2048
+controlplane:~$ ls
+60099.key  filesystem
+
+openssl req -new -key 60099.key -out 60099.csr --subj "/CN=60099@internal.users"
+
+Verify that the .csr is correct: 
+- openssl req -text -noout -verify -in 60099.csr
+
+-----
+
+cat 60099.csr | base64 -w 0
+
+LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1pEQ0NBVXdDQVFBd0h6RWRNQnNHQTFVRUF3d1VOakF3T1RsQWFXNTBaWEp1WVd3dWRYTmxjbk13Z2dFaQpNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUUMxZFJrMUNzQzNxV0Q5YnFrS29GSmYyNlgvCjRraHZYUVNWa25YOE10ZHNubFVtZXcrZVpIV3pYY2Z4K2tKWTVpTURUY0I4NjA2SVlRWC9ORzl5b2RUbzlqRXMKT0FscEFENks0T1lnczZyenY3NlFHSFZFQ2s2VHdFbXN5b3ZJRGFXUTNsRW8xQUNtcno0T3U3WUxwRVRmQTJRUQpKOGxjRkptQ294QWNuTGt5RTd3VWdwejJBeGw5blZMRCtmTUtRNS93Ukt3dFdyTktMM1daMENNZEx3V0piaHdvClpXMkpNWkV4QklIc3lTSWgwUFdQc0VtcFJFN3Nxb3NZd2NiY2dDc1NhZGJLTFRHbE5sWmlOVGkvOHBPQXdoZkoKTnRqcDdBVVgvSnNJRWV4anJQOFh0VDcvc2ZwbDlRbktPSjZvR3RVVnVwclV3Y0drQUJRSGNHaGJsdGQvQWdNQgpBQUdnQURBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQUg5andNb0Y1Nk5jK3FpY2RPcDhzOFJvcEMvTlk1QzF4Ckx0NERQdCtLYmozdnp6Vkd2SlBLNnluLzQ0SzZ4ZXJHSFNXcitTZmF2SXVBcVNoSTZOS0IwSHlMZHdPVENENkwKeVRjOElCeEZ5M2JaRHYxdDlDZ0xzY25JUXY0eVZzODlaNmZwSXZ5b09ERzZ3ZVN5NndtS3JoakxDUW9NQWpQNQppUVZGKzFSK0RoQUQ4UnZNMjFqclVpaC93ZmRiNEkySWovQXR1Y2hoRUNjbDVGSXptM2ZpRmxOZGFrbTdlUWo5CkRQNFlnVEhsQWw2TTdSUjN2cWZuNkRYT2d4NW5hM2RHVlVQcjZhQ3p3eU1mcWUydEEraStrVnVjTE1GekkyUnoKanM1S1ZoNWN4VHE4Ri93UmpRaU5nOXg5M1RaQlE1d1diOXhvaW92b0phaEh3bmlhR1VJTWNnPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tCg==
+
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: 60099@internal.users
+spec:
+  groups:
+  - system:authenticated
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1pEQ0NBVXdDQVFBd0h6RWRNQnNHQTFVRUF3d1VOakF3T1RsQWFXNTBaWEp1WVd3dWRYTmxjbk13Z2dFaQpNQTBHQ1NxR1NJYjNEUUVCQVFVQUE0SUJEd0F3Z2dFS0FvSUJBUUMxZFJrMUNzQzNxV0Q5YnFrS29GSmYyNlgvCjRraHZYUVNWa25YOE10ZHNubFVtZXcrZVpIV3pYY2Z4K2tKWTVpTURUY0I4NjA2SVlRWC9ORzl5b2RUbzlqRXMKT0FscEFENks0T1lnczZyenY3NlFHSFZFQ2s2VHdFbXN5b3ZJRGFXUTNsRW8xQUNtcno0T3U3WUxwRVRmQTJRUQpKOGxjRkptQ294QWNuTGt5RTd3VWdwejJBeGw5blZMRCtmTUtRNS93Ukt3dFdyTktMM1daMENNZEx3V0piaHdvClpXMkpNWkV4QklIc3lTSWgwUFdQc0VtcFJFN3Nxb3NZd2NiY2dDc1NhZGJLTFRHbE5sWmlOVGkvOHBPQXdoZkoKTnRqcDdBVVgvSnNJRWV4anJQOFh0VDcvc2ZwbDlRbktPSjZvR3RVVnVwclV3Y0drQUJRSGNHaGJsdGQvQWdNQgpBQUdnQURBTkJna3Foa2lHOXcwQkFRc0ZBQU9DQVFFQUg5andNb0Y1Nk5jK3FpY2RPcDhzOFJvcEMvTlk1QzF4Ckx0NERQdCtLYmozdnp6Vkd2SlBLNnluLzQ0SzZ4ZXJHSFNXcitTZmF2SXVBcVNoSTZOS0IwSHlMZHdPVENENkwKeVRjOElCeEZ5M2JaRHYxdDlDZ0xzY25JUXY0eVZzODlaNmZwSXZ5b09ERzZ3ZVN5NndtS3JoakxDUW9NQWpQNQppUVZGKzFSK0RoQUQ4UnZNMjFqclVpaC93ZmRiNEkySWovQXR1Y2hoRUNjbDVGSXptM2ZpRmxOZGFrbTdlUWo5CkRQNFlnVEhsQWw2TTdSUjN2cWZuNkRYT2d4NW5hM2RHVlVQcjZhQ3p3eU1mcWUydEEraStrVnVjTE1GekkyUnoKanM1S1ZoNWN4VHE4Ri93UmpRaU5nOXg5M1RaQlE1d1diOXhvaW92b0phaEh3bmlhR1VJTWNnPT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUgUkVRVUVTVC0tLS0tCg==
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+
+k get csr
+NAME                   AGE   SIGNERNAME                                    REQUESTOR                  REQUESTEDDURATION   CONDITION
+60099@internal.users   82s   kubernetes.io/kube-apiserver-client           kubernetes-admin           <none>              Pending
+
+k certificate approve 60099@internal.users
+certificatesigningrequest.certificates.k8s.io/60099@internal.users approved
+
+controlplane:~$ k get csr
+NAME                   AGE    SIGNERNAME                                    REQUESTOR                  REQUESTEDDURATION   CONDITION
+60099@internal.users   101s   kubernetes.io/kube-apiserver-client           kubernetes-admin           <none>              Approved,Issued
+
+k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+User "60099@internal.users" set.
+
+controlplane:~$ k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+Context "60099@internal.users" created.
+
+controlplane:~$ k config get-contexts
+CURRENT   NAME                          CLUSTER      AUTHINFO               NAMESPACE
+          60099@internal.users          kubernetes   60099@internal.users   
+*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin       
+
+controlplane:~$ k config use-context 60099@internal.users
+Switched to context "60099@internal.users".

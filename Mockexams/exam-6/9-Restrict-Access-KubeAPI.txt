@@ -1,0 +1,35 @@
+# Restrict access for a user to the Kubernetes API
+
+openssl genrsa -out /root/60099.key 2048
+
+openssl req -new -key 60099.key -out 60099.csr -subj="/CN=60099@internal.users"
+
+cat 60099.csr | base64 -w 0
+
+vi test
+
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: 60099@internalusers
+spec:
+  request: <paste output of csr base64>
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 86400
+  usages:
+  - client auth
+
+k apply -f test
+
+k certificates approve 60099@internal.users
+
+k config set-credentials 60099@internal.users --client-key 60099.key --client-certificate 60099.crt
+
+k config set-context 60099@internal.users --cluster kubernetes --user=60099@internal.users
+
+k use context 600999@internal.users
+
+k get pods
+'Error from server (forbidden): pods is forbidden: User "60099@internal.users" cannot list resources pods in API group "" in the namespace default'
+
+

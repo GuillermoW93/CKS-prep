@@ -1,0 +1,58 @@
+
+controlplane:~$ k create sa -n ns1 pipeline
+serviceaccount/pipeline created
+
+controlplane:~$ k create sa -n ns2 pipeline
+serviceaccount/pipeline created
+
+k auth can-i delete deployments --as system:serviceaccount:ns1:pipeline -n ns1
+no
+
+k auth can-i delete deployments --as system:serviceaccount:ns2:pipeline -n ns2
+no
+
+k create clusterrolebinding pipeline-view --clusterrole view --serviceaccount ns1:pipeline --servi
+ceaccount ns2:pipeline
+- This ensures that both serviceaccounts can view almost everything in the cluster. 
+- It maps the current 'clusterrole' view to the clusterrolebinding and the serviceaccounts.
+
+k get clusterrolebindings.rbac.authorization.k8s.io -n ns2 pipeline-view -o yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  creationTimestamp: "2026-02-13T09:25:33Z"
+  name: pipeline-view
+  resourceVersion: "5254"
+  uid: 790580d7-c60f-4675-88ed-aa5dfe91b90e
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+- kind: ServiceAccount
+  name: pipeline
+  namespace: ns1
+- kind: ServiceAccount
+  name: pipeline
+  namespace: ns2
+
+k create clusterrole pipeline-deployment-manager --verb create,delete --resource deployments
+
+k -n ns1 create rolebinding pipeline-deployment-manager --clusterrole pipeline-deployment-manager --serviceaccount ns1:pipeline
+
+k -n ns2 create rolebinding pipeline-deployment-manager --clusterrole pipeline-deployment-manager 
+--serviceaccount ns2:pipeline
+
+Verify:
+
+controlplane:~$ k auth can-i delete deployments --as system:serviceaccount:ns1:pipeline -n ns1 # YES
+yes
+
+controlplane:~$ k auth can-i delete deployments --as system:serviceaccount:ns2:pipeline -n ns2 # YES
+yes
+
+controlplane:~$ k auth can-i update deployments --as system:serviceaccount:ns2:pipeline -n ns2 # NO
+no - RBAC: clusterrole.rbac.authorization.k8s.io "view" not found
+
+controlplane:~$ k auth can-i update deployments --as system:serviceaccount:ns1:pipeline -n ns1 # NO
+no - RBAC: clusterrole.rbac.authorization.k8s.io "view" not found 

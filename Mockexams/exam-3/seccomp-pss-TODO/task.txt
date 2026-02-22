@@ -1,0 +1,68 @@
+Scenario 2: Hardening with Seccomp & Pod Security
+
+Topic: Seccomp Profile Apply & PodSecurityStandards
+Context: A critical application needs to be locked down.
+
+Setup (Deploy this first):
+Create the profile on your worker node:
+
+Bash
+# Run this on the node where the pod will run (e.g., k3s-worker or master)
+mkdir -p /var/lib/kubelet/seccomp/profiles
+echo '{
+    "defaultAction": "SCMP_ACT_ERRNO",
+    "architectures": [
+        "SCMP_ARCH_X86_64",
+        "SCMP_ARCH_X86",
+        "SCMP_ARCH_X32"
+    ],
+    "syscalls": [
+        {
+            "names": [
+                "accept4",
+                "epoll_wait",
+                "pselect6",
+                "futex",
+                "madvise",
+                "epoll_ctl",
+                "getsockname",
+                "setsockopt",
+                "vfork",
+                "mmap",
+                "read",
+                "write",
+                "close",
+                "arch_prctl",
+                "sched_getaffinity",
+                "munmap",
+                "brk",
+                "rt_sigaction",
+                "rt_sigprocmask",
+                "sigaltstack",
+                "gettid",
+                "clone",
+                "bind",
+                "socket",
+                "openat",
+                "execve",
+                "set_tid_address",
+                "set_robust_list",
+                "prlimit64",
+                "pread64",
+                "getrandom",
+                "pipe2",
+                "exit_group",
+                "select",
+                "getpid",
+                "fcntl"
+            ],
+            "action": "SCMP_ACT_ALLOW"
+        }
+    ]
+}' > /var/lib/kubelet/seccomp/profiles/audit.json
+The Task:
+
+Create a namespace named secure-team.
+
+Enforce the Baseline Pod Security Standard on this namespace, but ensure it warns on Restricted violations.
+

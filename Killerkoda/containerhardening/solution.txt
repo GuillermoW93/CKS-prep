@@ -1,0 +1,27 @@
+Adjust the Dockerfile to:
+
+  1 FROM ubuntu:20.04
+  2 RUN apt-get update && apt-get -y install curl
+  3 ENV URL https://google.com/this-will-fail?secret-token=
+  4 CMD ["sh", "-c", "curl --head $URL$TOKEN"]
+
+Run podman/docker build -t .
+podman/docker run -e TOKEN=2e064aad-3a90-4cde-ad86-16fad1f8943e
+
+But in order to prevent exec into the container adjust the Dockerfile:
+
+FROM ubuntu:20.04
+RUN apt-get update && apt-get -y install curl
+ENV URL https://google.com/this-will-fail?secret-token=
+RUN rm /usr/bin/bash
+CMD ["sh", "-c", "curl --head $URL$TOKEN"]
+
+Let's try to connect ;)
+
+podman exec -it f024a05a9e14 bash
+Error: runc: exec failed: unable to start container process: exec: "bash": executable file not found in $PATH: OCI runtime attempted to invoke a command that was not found
+
+controlplane:~/image$ podman exec -it f024a05a9e14 sh   
+# 
+
+Bash does not work anymore because we removed it. SH still works though.

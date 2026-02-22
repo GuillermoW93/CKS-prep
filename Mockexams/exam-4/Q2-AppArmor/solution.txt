@@ -1,0 +1,7 @@
+apparmor_parser -q deny-write.profile
+
+k apply -f pod-with-apparmor.yaml
+
+k exec -it pod/hello-apparmor -- touch /tmp/hacker.txt
+touch: /tmp/hacker.txt: Permission denied
+command terminated with exit code 1

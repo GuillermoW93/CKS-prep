@@ -1,0 +1,21 @@
+Falco has been installed on Node controlplane and it runs as a service.
+
+It's configured to log to syslog, and this is where the verification for this scenario also looks.
+
+Cause the rule Terminal shell in container to log by:
+
+creating a new Pod of image nginx:alpine
+kubectl exec -it POD -- sh into it
+check the Falco logs contain a related output
+
+
+------
+
+Change the Falco output of rule Terminal shell in container to:
+
+include NEW SHELL!!! at the very beginning
+include user_id=%user.uid at any position
+include repo=%container.image.repository at any position
+Cause syslog output again by creating a shell in that Pod.
+
+Verify the syslogs contain the new data.

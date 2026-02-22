@@ -1,0 +1,5 @@
+There are existing Pods in Namespace app .
+
+We need a new default-deny NetworkPolicy named deny-out for all outgoing traffic from Pods in Namespace app .
+
+It should still allow DNS traffic on port 53 TCP and UDP.

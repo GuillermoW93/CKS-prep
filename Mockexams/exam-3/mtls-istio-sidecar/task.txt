@@ -1,0 +1,9 @@
+You are the security administrator for a cluster running Istio. A namespace named restricted-zone has been created, and it contains a critical payment service.
+
+Task:
+
+Ensure that all Pods in the restricted-zone namespace automatically get an Istio sidecar injected when they are created.
+
+Enforce Strict mTLS (Mutual TLS) for the entire restricted-zone namespace. No plain-text traffic should be allowed to services in this namespace.
+
+Verify that a legacy pod (without a sidecar) from the default namespace cannot access the services in restricted-zone.

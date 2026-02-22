@@ -1,0 +1,29 @@
+Before the 'access' is allowed:
+- nc -v 1.1.1.1 53
+Connection to 1.1.1.1 53 port [tcp/domain] succeeded!
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: metadata-server
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      trust: nope
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 1.1.1.1/32
+
+The other pod (with no label that matches) it still works:
+
+controlplane:~$ k exec trust-0 -- nc -v 1.1.1.1 53
+1.1.1.1 (1.1.1.1:53) open
+
+controlplane:~$ k exec no-trust-0 -- nc -v 1.1.1.1 53
+^C

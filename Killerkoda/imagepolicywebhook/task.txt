@@ -1,0 +1,7 @@
+An ImagePolicyWebhook setup has been half finished, complete it:
+
+Make sure admission_config.json points to correct kubeconfig
+Set the allowTTL to 100
+All Pod creation should be prevented if the external service is not reachable
+The external service will be reachable under https://localhost:1234 in the future. It doesn't exist yet so it shouldn't be able to create any Pods till then
+Register the correct admission plugin in the apiserver

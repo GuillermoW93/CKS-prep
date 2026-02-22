@@ -1,0 +1,9 @@
+Cloud providers can have Metadata Servers which expose critical information, for example GCP or AWS.
+
+For this task we assume that there is a Metadata Server at 1.1.1.1 .
+
+You can test connection to that IP using nc -v 1.1.1.1 53 .
+
+Create a NetworkPolicy named metadata-server In Namespace default which restricts all egress traffic to that IP.
+
+The NetworkPolicy should only affect Pods with label trust=nope .

@@ -1,0 +1,22 @@
+The Task: Load an AppArmor profile that denies writing to /tmp. Launch a pod that uses this profile and try to write a file to /tmp.
+
+Note*
+
+If you see the following error:
+
+Cache read/write disabled: interface file missing. (Kernel needs AppArmor 2.4 compatibility patch.)
+Warning: unable to find a suitable fs in /proc/mounts, is it mounted?
+
+Run the following command to enable AppArmor:
+cat /sys/module/apparmor/parameters/enabled
+N
+
+sudo vi /boot/firmware/cmdline.txt and append at the end "apparmor=1 security=apparmor"
+
+Reboot the node and verify:
+
+cat /sys/module/apparmor/parameters/enabled
+Y
+
+Verify: ls /sys/kernel/security/apparmor
+aa-status

@@ -1,0 +1,11 @@
+You're asked to verify if the following AppArmor profiles are available on node01 :
+
+docker-default
+snap.lxd.lxc
+ftpd
+tcpdump
+Create file /root/profiles.txt on node controlplane . It should contain only these profile names that are available on node01
+
+There is an existing Deployment named spacecow in Namespace moon .
+
+It should be configured to use AppArmor profile docker-default , but something seems wrong.

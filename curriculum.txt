@@ -1,0 +1,3 @@
+ALWAYS VERIFY THE LATEST CURRICULUM FOR CHANGES!
+
+https://github.com/cncf/curriculum/tree/master/cks

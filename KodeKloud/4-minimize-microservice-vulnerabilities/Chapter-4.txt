@@ -1,0 +1,224 @@
+4.) Minimizing Microservices Vulnerabilties
+
+Security Contexts
+Capabilities are only available at container-level (not pod-level)
+
+Find out which user is in the pod (k exe -it <pod> —whoami)
+
+Admission Controllers
+Kubelet -> Authentication -> Authorization -> Create Pod
+RBAC-role (developer may create pod)
+
+
+Kubelet -> Authentication -> Authorization -> Admission Controllers -> Create Pod
+
+Admission Controllers:
+AlwaysPullImages
+DefaultStorageClass
+EventRateLimit
+NamespaceAutoProvision = EOL -> Alternative == NameSpaceLifecyle
+NamespaceExists = EOL -> Alternative == NameSpaceLifecyle
+..
+
+Verify enabled Admission Controllers
+“kube-apiserver -h | grep enable-admission-plugins”
+“ps -ef | grep kube-apiserver | grep admission-plugins"
+
+Verify enabled Admission Controller on Kubeadm:
+"kubectl exec cube-apiserver-controller -n kube-system — kube-apiserver -h | grep enable-admission-plugins”
+
+Edit /etc/kubernetes/manifests/kube-apiserver.yaml or kube-apiserver.service by adding: “—enable-admission-plugins=NodeRestriction”
+
+Validating and Mutating Admission Controllers
+Admission Webhook Server (deployment-/service)
+
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+     name: “example”
+webhooks:
+name: “example”
+       clientConfig:
+          url: “URL”
+
+or:  
+
+       service:
+           namespace: <Example>
+           Name: <example>
+       rules:
+apiGroups: [“”}
+apiversions: [“v1”]
+operations: [“create”]
+resources: [“pods”]
+
+Pod Security Admission (PSA) + Pod Security Standards (PSS)
+Mode:       On Violation:
+enforce      Reject Pod
+audit          Record in audit logs
+warn          Trigger user-facing warning
+
+Profiel         Description
+Privileged   Unrestricted policy
+Baseline      Minimally restrictive policy
+Restricted   Heavily restricted policy
+
+Example:
+“kubectl label ns payroll pod-security.kubernetes.io/enforce=restricted”
+
+Open Policy Agent (OPA)
+curl -L -o opa https://github.com/open-policy-agent/opa/releases/download/v0.11.0/opa_linux_amd64
+chmod 755 ./opa
+./opa run -s
+
+Load Policy (.rego files)
+
+package httpapi.authz
+import input
+default allow = false
+allow {
+   input.path == “home”
+   input.user == “john"
+}
+
+Command to import: “curl -X PUT —data-binary @example.rego http://localhost:8181/v1/policies/example1”
+
+View list of existing policies: “curl http://localhost:8181/v1/policies”
+
+
+OPA in Kubernetes (Gatekeeper)
+
+All pods must have a label
+package kubernetes.admission
+
+deny[msg] {
+  input.request.kind.kind == "Pod"
+  not input.request.object.metadata.labels.app
+  msg := "Pod must have label 'app'"
+}
+
+
+OPA Gatekeeper
+ConstraintTemplate
+
+apiVersion: templates.gatekeeper.sh/v1beta1 kind: ConstraintTemplate metadata: name: k8srequiredlabels spec: crd: spec: names: kind: K8sRequiredLabels targets: - target: admission.k8s.gatekeeper.sh rego: | package k8srequiredlabels violation[{"msg": msg}] { required := input.parameters.labels provided := input.review.object.metadata.labels missing := required[_] not provided[missing] msg := sprintf("Missing required label: %v", [missing]) }
+
+Contstaint
+apiVersion: constraints.gatekeeper.sh/v1beta1 kind: K8sRequiredLabels metadata: name: require-app-label spec: parameters: labels: - app
+
+Create pod without label (error)
+apiVersion: v1 kind: Pod metadata: name: bad-pod spec: containers: - name: nginx image: nginx
+
+https://kubernetes.io/blog/2019/08/06/opa-gatekeeper-policy-and-governance-for-kubernetes/
+
+Container Sandboxing
+gVisor
+Extra layer between Linux Kernel - Container
+Sentry
+Gofer (middleman to prevent potential abuse)
+Kata Containers
+OPZOEKEN!
+
+docker run —runtime <runsc or kata> -d nginx
+
+Runtime Class in Kubernetes
+gvisor.yaml
+apiVersion: node.k8s.io/v1beta1
+kind: RuntimeClass
+metadata:
+      name: gvisor
+handler: runsc
+
+To run a pod using gvisor/kata use:
+
+apiVersion: v1
+kind: Pod
+metadata:
+    name: nginx
+    Labels:
+        Run: nginx
+spec:
+    runtimeClassName: gvisor
+    containers:
+image: nginx
+name: nginx
+
+Verify proces (pgrep -a nginx or pgrep -a runsc)
+You are not seeing Nginx on the node, but runsc. That means its isolated.
+
+Overview of Multi-Tenancy in Kubernetes
+Challenges
+Isolate environments
+Prevent workload from tenant to impact others
+Compliance
+
+Levels of Isolation in Kubernetes
+
+Control plane isolation
+Namespaces
+Access Controls
+Resource Quotas 
+
+Data Plane isolation
+Storage
+Network
+Node
+
+DNS
+service.namespace.svc.cluster.local
+k edit configmap coredns -n kube-system
+(limit dns lookups)
+
+Pod-to-Pod Encryption
+Data security
+Compliance requirmenets
+Mitigating insider threats
+Zero-trust Security Model
+Prevention of MITM attack
+Confidentiality and Integrity
+Enhanced security posture
+Automated key management
+Inter-pod communication security
+Adaptability to cloud environments
+
+mTLS (Services)
+Implemented by Istio or LinkerD
+
+Security Pod-to-Pod Communication Using Istio
+Request cert from B
+Ask cert from pod A
+Pod A sends public key with symmetric key
+Validate cert and encrypted with symmetric key
+
+LinkerD/Istio implement mTLS
+Secure service-to-service communication
+Injects sidecar pod
+Encrypts messages/sends further
+
+Verify if namespace is labeled correctly for mTLS Istio
+istioctl analyze -n test
+k label namespace test istio-injection=enabled
+namespace/test labeled
+
+Cillium
+Provides/secures network connectivity between container-apps (pod-2-pod encryption)
+
+Verify encrypted traffic between two pods
+k exec -it test — /bin/bash apt-get update &&
+ apt-get install -y tcpdump tcpdump -i eth0 -nn
+
+Install Cillium
+
+helm repo add cilium https://helm.cilium.io/
+
+helm install cilium cilium/cilium --version v1.18.0-pre.0 \
+  --namespace kube-system \
+  --set encryption.enabled=true \
+  --set encryption.type=wireguard
+cilium status
+cilium encryption status
+
+
+
+
+

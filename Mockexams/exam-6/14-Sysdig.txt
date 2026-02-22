@@ -1,0 +1,12 @@
+# Install sysdig
+
+apt-get install sysdid
+
+sysdig --list | grep uid
+
+sysdid -p "user_id=%user.uid repo=%container.image.repository" container.name=pod
+
+> Test by 'k run test --image=nginx --command sleep 1h' 
+> 'k exec -it pod/test -- sh'
+
+

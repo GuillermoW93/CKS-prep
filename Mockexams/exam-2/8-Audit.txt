@@ -1,0 +1,54 @@
+# Question
+Question: Enable auditing in this kubernetes cluster. Create a new audit policy file that will only log events based on the details:
+
+Namespace: test
+Level: metadata
+Operations: delete & update
+Resources: pods
+Log Path: /var/log/test-audit.log
+Audit file location: /etc/kubernetes/test-audit.yaml
+Maximum days to keep the logs: 20
+
+# Solution
+Reference: https://kubernetes.io/docs/tasks/debug-application-cluster/audit/
+
+Create audit file in /etc/kubernetes/test-audit.yaml
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+- level: Metadata ## level of verbosity
+  namespace: ["test"] ## ensure to use correct namespace
+  verb: ["delete","update"] ## correct operations specified?
+  resources:
+  - group: ""
+    resource: ["pods"] ## correct resource specified?
+
+Edit the kube-apiserver config (/etc/kubernetes/manifests/kube-apiserver.yaml) and add:
+
+- --audit-policy-file=/etc/kubernetes/test-audit.yaml ## ensure correct audit policy file is specified
+- --audit-log-path=/var/log/test-audit.log ## log path
+- --audit-log-maxage=20 ## max days to keep the log
+
+Make sure to add the volume/volumeMount:
+
+volumes:
+  - name: audit
+    hostPath:
+      path: /etc/kubernetes/test-audit.yaml
+      type: File
+  - name: audit-log
+    hostPath:
+      path: /var/log/test-audit.log
+      type: FileOrCreate
+volumeMounts:
+  - mountPath: /etc/kubernetes/test-audit.yaml
+    name: audit
+    readOnly: true
+  - mountPath: /var/log/test-audit.log
+    name: audit-log
+    readOnly: false
+
+Verify kube-apiserver is back online (watch crictl ps / journalctl -fu kube-apiserver/apiserver)
+
+

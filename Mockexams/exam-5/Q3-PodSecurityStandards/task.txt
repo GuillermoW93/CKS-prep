@@ -1,0 +1,4 @@
+Creates a namespace with the Pod Security Standard "baseline" enforcement
+Deploys a pod that complies with the baseline standard (non-root, no
+privilege escalation)
+Sets up RBAC permissions for the PSS viewer service account

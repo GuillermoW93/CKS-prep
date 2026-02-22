@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: secure-backend
+  namespace: network-security
+spec:
+  podSelector:
+    matchLabels:
+      app: backend # applies to all pods with labels 'app=backend'
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend # only pods with labels 'app=frontend' with TCP/8080 are allowed to connect to 'app=backend'
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: database # pods with labels 'app=database' are allowed to reach 'app=backend' via TCP/5432
+      ports:
+        - protocol: TCP
+          port: 5432

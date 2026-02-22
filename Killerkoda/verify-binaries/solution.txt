@@ -1,0 +1,24 @@
+controlplane:~$ VERSION=$(kubelet --version | cut -d ' ' -f2)
+wget https://dl.k8s.io/$VERSION/kubernetes-server-linux-amd64.tar.gz
+tar xzf kubernetes-server-linux-amd64.tar.gz
+--2026-02-13 11:18:06--  https://dl.k8s.io/v1.34.3/kubernetes-server-linux-amd64.tar.gz
+Resolving dl.k8s.io (dl.k8s.io)... 151.101.129.91, 151.101.193.91, 151.101.1.91, ...
+Connecting to dl.k8s.io (dl.k8s.io)|151.101.129.91|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 335180800 (320M) [application/x-tar]
+Saving to: 'kubernetes-server-linux-amd64.tar.gz'
+
+kubernetes-server-linux-amd6 100%[============================================>] 319.65M  13.2MB/s    in 22s     
+
+2026-02-13 11:18:28 (14.7 MB/s) - 'kubernetes-server-linux-amd64.tar.gz' saved [335180800/335180800]
+
+controlplane:~$ whereis kubelet
+kubelet: /usr/bin/kubelet
+
+controlplane:~$ sha512sum /usr/bin/kubelet
+d7cd4aa51cc5e44ef1624fae2af58c51a159e0f6e1c617f427e64e5243290ab97771e4ae9491c56a2c1e05c3222b0090e297e47591272bc552d6b630ffa64f5b  /usr/bin/kubelet
+
+controlplane:~$ sha512sum kubernetes/server/bin/kubelet
+fe7adba29237038eb86e67610df5268d9aac462fb730a3760ed72fc9318b8df7e1ef3b150e12fc2ff42dfeb13c4ffca80b5ad38eee0b3bb03522ba972f3119dd  kubernetes/server/bin/kubelet
+
+controlplane:~$ echo DIFFERENT > /answer

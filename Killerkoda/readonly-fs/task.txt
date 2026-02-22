@@ -1,0 +1,11 @@
+Create a Pod named pod-ro in Namespace sun of image busybox:1.32.0 .
+
+Make sure the container keeps running, like using sleep 1d .
+
+The container root filesystem should be read-only.
+
+----
+
+The Deployment web4.0 in Namespace moon doesn't seem to work with readOnlyRootFilesystem .
+
+Add an emptyDir volume to fix this.

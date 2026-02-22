@@ -1,0 +1,50 @@
+controlplane:~$ openssl genrsa -out 60099.key 
+controlplane:~$ openssl req -new -key 60099.key -out 60099.csr
+You are about to be asked to enter information that will be incorporated
+into your certificate request.
+What you are about to enter is what is called a Distinguished Name or a DN.
+There are quite a few fields but you can leave some blank
+For some fields there will be a default value,
+If you enter '.', the field will be left blank.
+-----
+Country Name (2 letter code) [AU]:                    
+State or Province Name (full name) [Some-State]:
+Locality Name (eg, city) []:
+Organization Name (eg, company) [Internet Widgits Pty Ltd]:
+Organizational Unit Name (eg, section) []:
+Common Name (e.g. server FQDN or YOUR name) []:60099@internal.users
+Email Address []:
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:
+
+----
+
+https://kubernetes.io/docs/tasks/administer-cluster/certificates/
+
+openssl x509 -req -in 60099.csr -CA /etc/kubernetes/pki/ca.crt -CAkey /etc/kubernetes/pki/ca.key -CAcreateserial -out 60099.crt
+          
+Certificate request self-signature ok
+subject=C = AU, ST = Some-State, O = Internet Widgits Pty Ltd, CN = 60099@internal.users
+
+For question 2: 
+https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+k config set-credentials 60099@internal.users --client-key=60099.key --client-certificate=60099.crt
+User "60099@internal.users" set.
+
+k config set-context 60099@internal.users --cluster=kubernetes --user=60099@internal.users
+Context "60099@internal.users" created.
+
+k config get-contexts
+CURRENT   NAME                          CLUSTER      AUTHINFO               NAMESPACE
+          60099@internal.users          kubernetes   60099@internal.users   
+*         kubernetes-admin@kubernetes   kubernetes   kubernetes-admin      
+
+k config use-context 60099@internal.users
+Switched to context "60099@internal.users".
+
+k get ns
+Error from server (Forbidden): namespaces is forbidden: User "60099@internal.users" cannot list resource "namespaces" in API group "" at the cluster scope

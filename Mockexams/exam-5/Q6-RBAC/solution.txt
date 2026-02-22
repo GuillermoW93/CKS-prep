@@ -1,0 +1,42 @@
+# ServiceAccount 
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-reader
+  namespace: rbac-minimize
+
+# Role
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-reader-role
+  namespace: rbac-minimize
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "watch", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "watch", "list"]
+
+# Rolebinding
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: app-reader-binding
+  namespace: rbac-minimize
+subjects:
+  - kind: ServiceAccount
+    name: app-reader
+    namespace: rbac-minimize
+roleRef:
+  kind: Role
+  name: app-reader-role
+  apiGroup: rbac.authorization.k8s.io
+
+# Verify
+
+'k auth can-i get pods --as=system:serviceaccount:rbac-minimize:app-reader -n rbac-minimize'

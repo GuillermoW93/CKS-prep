@@ -1,0 +1,50 @@
+k run pod-ro -n sun --image=busybox:1.32.0 --command sleep 1d --dry-run=client -o yaml > pod.yaml
+
+  1 apiVersion: v1
+  2 kind: Pod
+  3 metadata:
+  4   labels:
+  5     run: pod-ro
+  6   name: pod-ro
+  7   namespace: sun
+  8 spec:
+  9   containers:
+ 10   - command:
+ 11     - sleep
+ 12     - 1d
+ 13     image: busybox:1.32.0
+ 14     name: pod-ro
+ 15     resources: {}
+ 16     securityContext:
+ 17       readOnlyRootFilesystem: true
+ 18   dnsPolicy: ClusterFirst
+ 19   restartPolicy: Always
+ 20 status: {}
+
+
+---
+
+k get pods -n moon
+NAME                     READY   STATUS             RESTARTS      AGE
+web4.0-898d9bbd7-8hhcb   0/1     CrashLoopBackOff   5 (87s ago)   4m29s
+web4.0-898d9bbd7-fgmbv   0/1     CrashLoopBackOff   5 (72s ago)   4m29s
+
+controlplane:~$ k logs -n moon web4.0-898d9bbd7-8hhcb
+sh: can't create /etc/date.log: Read-only file system
+
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - date > /etc/date.log && sleep 1d
+        image: busybox:1.32.0
+        name: container
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc
+          name: temp
+      volumes:
+      - name: temp
+        emptyDir: {}

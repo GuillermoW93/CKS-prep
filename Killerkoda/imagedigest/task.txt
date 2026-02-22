@@ -1,0 +1,7 @@
+Image tags can be overwritten, digests not.
+
+Create a Pod named crazy-pod which uses the image digest nginx@sha256:eb05700fe7baa6890b74278e39b66b2ed1326831f9ec3ed4bdc6361a4ac2f333 .
+
+----
+
+Convert the existing Deployment crazy-deployment to use the image digest of the current tag instead of the tag.

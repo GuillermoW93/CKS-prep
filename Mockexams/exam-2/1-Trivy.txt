@@ -1,0 +1,12 @@
+# Question 
+There are a number of pods running in the "spectacle" namespace. Identify and delete the pods which have CRITICAL vulnerabilities.
+
+# Solution
+
+kubectl get pods -n spectacle -o yaml | grep "image"
+
+trivy image --severity CRITICAL <image:tag>
+
+kubectl delete pods -n spectacle <pod_name_with_vulnerability>
+
+ 

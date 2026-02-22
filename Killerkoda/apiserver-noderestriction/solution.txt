@@ -1,0 +1,39 @@
+Verify that at 'this' moment you are allowed to label the node:
+- k label node node01 node-restriction.kubernetes.io/one=123
+node/node01 labeled
+
+Verify it's applied:
+- k get node --show-labels
+NAME           STATUS   ROLES           AGE   VERSION   LABELS
+node01         Ready    <none>          10d   v1.34.3   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=node01,kubernetes.io/os=linux,node-restriction.kubernetes.io/one=123
+
+Delete the label for now:
+- k label node node01 node-restriction.kubernetes.io/one-     
+node/node01 unlabeled
+
+-------
+
+Next:
+
+Enable the NodeRestriction Admission Controller and verify the issue is gone.
+
+Try to add label node-restriction.kubernetes.io/two=123 from Node node01 to Node node01
+
+Use this page: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
+
+Add the following to /etc/kubernetes/manifests/kube-apiserver.yaml
+- kube-apiserver --enable-admission-plugins=NodeRestriction
+
+Run 'watch crictl ps' to see the static pod 'kube-apiserver' rebuild
+- Verify it's back without error: "journalctl | grep apiserver"
+
+Try to label the node01 from node01:
+controlplane:~$ ssh node01
+Last login: Wed Feb 11 09:23:58 2026 from 10.244.3.166
+node01:~$     k label node node01 node-restriction.kubernetes.io/two=123             
+Error from server (Forbidden): nodes "node01" is forbidden: is not allowed to modify labels: node-restriction.kubernetes.io/two
+
+Please note*
+- If you try to run the command from controlplane it works, because it all depends on whom is 'authenticated'.
+
+This happens because of who you are authenticated as in each scenario. The NodeRestriction admission controller is specifically designed to limit what Kubelets (nodes) can do, but it does not restrict Administrators.

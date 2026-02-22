@@ -1,0 +1,48 @@
+# Question
+
+Given a Dockerfile, analyse it and update it based on security best practices.
+
+# Solution
+
+Example:
+
+
+vi ~/Dockerfile
+
+FROM ubuntu:latest
+
+ENV CI=true
+
+RUN apt get update
+RUN apt get install -y wget
+RUN apt get install -y curl
+
+USER root
+
+WORKDIR /code
+COPY package.json package-lock.json /code/
+RUN npm ci
+COPY src /code/src
+
+CMD [ "npm", "start" ]
+
+----
+
+Fixed Dockerfile
+
+vi ~/Dockerfile
+
+FROM ubuntu:20:04 ## updated image to a specific version
+
+ENV CI=true
+
+RUN apt-get update && apt-get install -y wget curl ## lighter image due to docker caching, prevents outdated version of installed packages
+
+USER user ## no privileged user being used
+
+WORKDIR /code
+COPY package.json package-lock.json /code/
+RUN npm ci
+COPY src /code/src
+
+CMD [ "npm", "start" ]

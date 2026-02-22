@@ -1,0 +1,16 @@
+There is an unwanted process running which listens on port 1234 .
+
+Kill the process and delete the binary.
+
+-----
+
+Your team has decided to use kube-bench via a DaemonSet instead of installing via package manager.
+
+Go ahead and remove the kube-bench package using the default package manager.
+
+-----
+
+The package vsftpd has been installed.
+
+Don't uninstall it, just stop the service.
+

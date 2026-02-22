@@ -1,0 +1,42 @@
+
+strace kill -9 1234
+# here we see: kill(1234, SIGKILL)
+
+strace kill -15 1234
+# here we see: kill(1234, SIGTERM)
+
+strace uname
+# here we see: uname
+
+strace nc -l -p 8080
+# here we see: bind(3, {sa_family=AF_INET, sin_port=htons(8080), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+
+------
+
+ps aux | grep kube-apiserver
+root        1927  4.9 11.9 1512940 274128 ?      Ssl  10:43   1:08 kube-apiserver --advertise-address=172.30.1.2 --allow-privileged=true --authorization-mode=Node,RBAC --client-ca-file=/etc/kubernetes/pki/ca.crt --enable-admission-plugins=NodeRestriction --enable-bootstrap-token-auth=true --etcd-cafile=/etc/kubernetes/pki/etcd/ca.crt --etcd-certfile=/etc/kubernetes/pki/apiserver-etcd-client.crt --etcd-keyfile=/etc/kubernetes/pki/apiserver-etcd-client.key --etcd-servers=https://127.0.0.1:2379 --kubelet-client-certificate=/etc/kubernetes/pki/apiserver-kubelet-client.crt --kubelet-client-key=/etc/kubernetes/pki/apiserver-kubelet-client.key --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname --proxy-client-cert-file=/etc/kubernetes/pki/front-proxy-client.crt --proxy-client-key-file=/etc/kubernetes/pki/front-proxy-client.key --requestheader-allowed-names=front-proxy-client --requestheader-client-ca-file=/etc/kubernetes/pki/front-proxy-ca.crt --requestheader-extra-headers-prefix=X-Remote-Extra- --requestheader-group-headers=X-Remote-Group --requestheader-username-headers=X-Remote-User --secure-port=6443 --service-account-issuer=https://kubernetes.default.svc.cluster.local --service-account-key-file=/etc/kubernetes/pki/sa.pub --service-account-signing-key-file=/etc/kubernetes/pki/sa.key --service-cluster-ip-range=10.96.0.0/12 --tls-cert-file=/etc/kubernetes/pki/apiserver.crt --tls-private-key-file=/etc/kubernetes/pki/apiserver.key
+root       15337  0.0  0.0   3528  1792 pts/0    S+   11:05   0:00 grep --color=auto kube-apiserver
+
+So, it's pid 1927
+
+strace -p 19890 -f -cw
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 47.31    1.422821        8419       169       126 futex
+ 41.93    1.260895        3128       403           epoll_pwait
+  8.45    0.254121         554       458           nanosleep
+  0.98    0.029459         260       113        54 read
+  0.91    0.027357         547        50           write
+  0.24    0.007109        7108         1         1 restart_syscall
+  0.09    0.002698         299         9           getrandom
+  0.04    0.001065         152         7           setsockopt
+  0.02    0.000453         151         3           sched_yield
+  0.01    0.000433         216         2         1 accept4
+  0.01    0.000401         400         1           rt_sigreturn
+  0.01    0.000207         207         1           tgkill
+  0.00    0.000136         135         1           getpid
+  0.00    0.000076          37         2           epoll_ctl
+  0.00    0.000059          59         1           getsockname
+  0.00    0.000052          52         1           close
+------ ----------- ----------- --------- --------- ----------------
+100.00    3.007344        2461      1222       182 total

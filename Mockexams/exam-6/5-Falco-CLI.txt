@@ -1,0 +1,17 @@
+# Question
+
+Using the runtime detection tool Falco, Analyse the container behavior for at least 20 seconds, using
+filters that detect newly spawning and executing processes in a single container of Nginx.
+store the incident file art /opt/falco-incident.txt, containing the detected incidents. one per line, in
+the format
+
+# Solution
+
+sudo falco -M 20 \
+  -f "container.image.repository contains nginx and evt.type=execve" \
+  -p "[%evt.time],[%user.uid],[%proc.name]" \
+  > /opt/falco-incident.txt
+
+-M 20 = seconds
+-f = filter
+-p = output format

@@ -1,0 +1,64 @@
+scp gvisor-install.sh node01:/root
+gvisor-install.sh   
+
+node01:~$ ls
+filesystem  gvisor-install.sh
+
+node01:~$     service kubelet status
+● kubelet.service - kubelet: The Kubernetes Node Agent
+     Loaded: loaded (/usr/lib/systemd/system/kubelet.service; enabled; preset: enabled)
+    Drop-In: /usr/lib/systemd/system/kubelet.service.d
+             └─10-kubeadm.conf
+     Active: active (running) since Fri 2026-02-13 09:39:23 UTC; 8min ago
+       Docs: https://kubernetes.io/docs/
+   Main PID: 1188 (kubelet)
+      Tasks: 13 (limit: 2237)
+     Memory: 35.5M (peak: 36.0M)
+        CPU: 9.369s
+     CGroup: /system.slice/kubelet.service
+             └─1188 /usr/bin/kubelet --bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/>
+
+---------
+
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: gvisor  
+handler: runsc
+
+k get runtimeclasses.node.k8s.io gvisor 
+NAME     HANDLER   AGE
+gvisor   runsc     57s
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sec
+spec:
+  runtimeClassName: gvisor
+  containers:
+    - image: nginx:1.21.5-alpine
+      name: sec
+
+node01:~$ k exec -it pod/sec -- dmesg
+[   0.000000] Starting gVisor...
+[   0.511896] Daemonizing children...
+[   0.983942] Singleplexing /dev/ptmx...
+[   1.139282] Mounting deweydecimalfs...
+[   1.249011] Committing treasure map to memory...
+[   1.748470] Forking spaghetti code...
+[   2.125744] Constructing home...
+[   2.612292] Creating process schedule...
+[   2.773340] Digging up root...
+[   3.064796] Reticulating splines...
+[   3.388343] Moving files to filing cabinet...
+[   3.510958] Setting up VFS...
+[   3.965696] Setting up FUSE...
+[   4.421845] Ready!
+
+node01:~$ k exec sec -- dmesg | grep -i gvisor
+[   0.000000] Starting gVisor...
+
+pgrep -a runsc
+7064 runsc --root=/run/containerd/runsc/k8s.io --log=/run/containerd/io.containerd.runtime.v2.task/k8s.io/754069a1ddefbd5e6520ca6a556f446ab3792322c060f9d6b40b3aea2eb8810c/log.json --log-format=json --panic-log=/var/log/pods/default_sec_9d362dd9-289b-4d6d-b2b0-101720fd79bb/gvisor_panic.log wait 754069a1ddefbd5e6520ca6a556f446ab3792322c060f9d6b40b3aea2eb8810c
+7191 runsc --root=/run/containerd/runsc/k8s.io --log=/run/containerd/io.containerd.runtime.v2.task/k8s.io/37fa675b0ef5a12c2cc37d5f60dc37915a25da724122d9df7f303e01ff54885a/log.json --log-format=json wait 37fa675b0ef5a12c2cc37d5f60dc37915a25da724122d9df7f303e01ff54885a

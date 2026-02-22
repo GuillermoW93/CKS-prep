@@ -1,0 +1,21 @@
+# Create deployment
+
+k create deployment -n asia --image=nginx --port=80 --replicas=2
+k create deployment -n europe --image=nginx --port=80 --replicas=2
+
+# Verify the service(s) of the deployments
+
+k get svc -n asia 
+k get svc -n europe
+
+# Create the secret for the Ingress
+
+k create secret tls -n world test-secret --cert cert.crt --key cert.key
+
+# Create the ingress
+
+k create ingress -n world world --annotation nginx.ingress.kubernetes.io/rewrite-target=/ --rule "world.universe.mine/europe=europe:80, tls=test-secret" 
+
+# Verify 
+
+k get ingress

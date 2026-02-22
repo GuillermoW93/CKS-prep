@@ -1,0 +1,68 @@
+# Create NS with PodSecurityStandard (notice the applied label)
+
+Reference: https://kubernetes.io/docs/tasks/configure-pod-container/enforce-standards-namespace-labels/
+
+'k create ns api-security' 
+'kubectl label namespace api-security \
+    pod-security.kubernetes.io/enforce=baseline'
+
+# Create a securepod in the namespace 'api-security'
+- Complies with baseline standard means (non-root, no privilege escalation)
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: secure-pod
+  namespace: api-security
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+  containers:
+    - name: nginx
+      image: nginx:stable
+      securityContext:
+        allowPrivilegeEscalation: false
+
+# Create ServiceAccount
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pss-viewer
+  namespace: api-security
+
+# Create role
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pss-viewer-role
+  namespace: api-security
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get"]
+  - apiGroups: [""]
+    resources: ["namespaces/status"]
+    verbs: ["get"]
+
+# Create rolebinding
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pss-viewer-binding
+  namespace: api-security
+subjects:
+  - kind: ServiceAccount
+    name: pss-viewer
+    namespace: api-security
+roleRef:
+  kind: Role
+  name: pss-viewer-role
+  apiGroup: rbac.authorization.k8s.io
+
+# Verify role/rolebinding with SA
+'k auth can-i get namespaces --as=system:serviceaccount:<namespace>:<sa_account> -n <namespace' 
+

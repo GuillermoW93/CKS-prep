@@ -1,0 +1,16 @@
+Scenario 4: Control Plane Hardening
+
+Topic: Kube-apiserver anonymous-auth
+Context: Kube-bench has reported that anonymous authentication is enabled.
+
+Setup (Simulate the Failure):
+If you are running K3s, the API server arguments are passed to the K3s service. If you are using kubeadm, they are in /etc/kubernetes/manifests/kube-apiserver.yaml.
+
+The Task:
+
+Locate the configuration for your API server.
+
+Change the flag --anonymous-auth from true (or default) to false.
+
+Ensure the API server restarts successfully.
+

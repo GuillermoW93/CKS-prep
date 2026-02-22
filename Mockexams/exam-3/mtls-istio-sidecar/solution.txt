@@ -1,0 +1,23 @@
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-*
+export PATH=$PWD/bin:$PATH
+istioctl install --set profile=demo -
+
+kubectl create ns restricted-zone
+kubectl label namespace restricted-zone istio-injection=enabled
+kubectl apply -f httpbin.yaml
+kubectl apply -f sleep.yaml -n restricted-zone
+
+kubectl apply -f mtls-strict.yaml
+peerauthentication.security.istio.io/default created
+
+--
+
+Verify:
+
+Try to curl httpbin from the sleep pod in the default namespace (which has no sidecar).
+- kubectl exec deploy/sleep -n default -- curl -v http://httpbin.restricted-zone:8000/headers
+
+Test from Injected Pod (Should PASS):
+To prove it works for valid clients, deploy a sleep pod inside the restricted-zone.
+- kubectl exec deploy/sleep -n restricted-zone -- curl -s http://httpbin.restricted-zone:8000/headers

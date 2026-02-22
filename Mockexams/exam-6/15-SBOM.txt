@@ -1,0 +1,16 @@
+# Bom generate report with Bom
+
+bom generate spdx-json --image <image> --output sbom1.json
+
+# Bom generate report with Trivy
+
+trivy image --format cyclonedx --output sbom2.json <image>/sbom
+
+# Bom generate report with Syft
+
+syft <image> -o spdx-json > sbom3.json
+
+# Grype check reports
+
+grype <sbom.json> | jq
+

@@ -1,0 +1,34 @@
+Scenario 5: ImagePolicyWebhook
+
+Topic: Configuration
+Context: The cluster has a webhook configured to validate images, but it's misconfigured.
+
+Setup:
+Create a dummy config file at /etc/kubernetes/admission/admission_config.yaml.
+
+YAML
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+- name: ImagePolicyWebhook
+  configuration:
+    imagePolicy:
+      kubeConfigFile: /etc/kubernetes/admission/kubeconf
+      allowTTL: 50
+      denyTTL: 50
+      retryBackoff: 500
+      defaultAllow: false # This implies everything is denied if the backend is unreachable
+
+The Task:
+
+The API server is failing to apply the policy correctly.
+
+Update the API server arguments to strictly enable the ImagePolicyWebhook admission controller.
+
+Point it to the configuration file created above.
+
+Key Flags to Add:
+
+--enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+
+--admission-control-config-file=/etc/kubernetes/admission/admission_config.yaml

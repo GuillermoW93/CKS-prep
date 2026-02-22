@@ -1,0 +1,11 @@
+You should install gVisor on the node node01 and make containerd use it.
+
+There is install script /root/gvisor-install.sh which should setup everything, execute it on node node01 .
+
+------
+
+Now that gVisor should be configured, create a new RuntimeClass for it.
+
+Then create a new Pod named sec using image nginx:1.21.5-alpine .
+
+Verify your setup by running dmesg in the Pod

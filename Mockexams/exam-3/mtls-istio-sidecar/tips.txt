@@ -1,0 +1,5 @@
+kubectl get peerauthentication -n <namespace>
+
+Verify why as service is unreachable, check if a peerauth policy exists
+
+

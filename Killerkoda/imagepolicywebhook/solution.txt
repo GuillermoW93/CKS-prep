@@ -1,0 +1,36 @@
+/etc/kubernetes/policywebhook/admission_config.json
+
+{
+   "apiVersion": "apiserver.config.k8s.io/v1",
+   "kind": "AdmissionConfiguration",
+   "plugins": [
+      {
+         "name": "ImagePolicyWebhook",
+         "configuration": {
+            "imagePolicy": {
+               "kubeConfigFile": "/etc/kubernetes/policywebhook/kubeconf",
+               "allowTTL": 100,
+               "denyTTL": 50,
+               "retryBackoff": 500,
+               "defaultAllow": false
+            }
+         }
+      }
+   ]
+}
+
+Add the following to the /etc/kubernetes/manifests/kube-apiserver.yaml
+
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+    - --admission-control-config-file=/etc/kubernetes/policywebhook/admission_config.json
+
+Verify that the kube-apiserver is recreated and is running:
+- watch crictl ps
+- crictl logs 6aa5f065670c4
+
+k run pod --image=nginx
+Error from server (Forbidden): pods "pod" is forbidden: Post "https://localhost:1234/?timeout=30s": dial tcp 127.0.0.1:1234: connect: connection refused

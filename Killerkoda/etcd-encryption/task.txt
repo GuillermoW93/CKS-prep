@@ -1,0 +1,12 @@
+Enable ETCD encryption and encrypt existing secrets
+
+Create an EncryptionConfiguration file at /etc/kubernetes/etcd/ec.yaml and make ETCD use it.
+One provider should be of type aesgcm with password this-is-very-sec . All new secrets should be encrypted using this one.
+One provider should be the identity one to still be able to read existing unencrypted secrets
+.
+
+-------
+
+Encrypt all existing Secrets in Namespace one using the new provider
+Encrypt all existing Secrets in Namespace two using the new provider
+Encrypt all existing Secrets in Namespace three using the new provider

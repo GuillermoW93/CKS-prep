@@ -1,0 +1,63 @@
+netstat -an | grep -w LISTEN | grep 1234
+tcp        0      0 0.0.0.0:1234            0.0.0.0:*               LISTEN   
+
+netstat -anap | grep 1234
+tcp        0      0 0.0.0.0:1234            0.0.0.0:*               LISTEN      12909/app1          
+tcp        0      0 127.0.0.1:41234         127.0.0.1:9099          TIME_WAIT   -   
+
+ls -l /proc/12909/exe 
+lrwxrwxrwx 1 root root 0 Feb 13 11:09 /proc/12909/exe -> /usr/bin/app1
+
+kill 12909
+
+ls -l /proc/12909/exe
+ls: cannot access '/proc/12909/exe': No such file or directory
+
+rm /usr/bin/app1
+
+-------
+
+apt list | grep kube-bench
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+kube-bench/now 0.6.5 amd64 [installed,local]
+controlplane:~$ 
+
+apt remove kube-bench
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following packages will be REMOVED:
+  kube-bench
+0 upgraded, 0 newly installed, 1 to remove and 50 not upgraded.
+After this operation, 24.5 MB disk space will be freed.
+Do you want to continue? [Y/n] y
+(Reading database ... 171882 files and directories currently installed.)
+Removing kube-bench (0.6.5) ...
+dpkg: warning: while removing kube-bench, directory '/usr/local' not empty so not removed
+
+-------
+
+apt list | grep vsftpd
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+vsftpd-dbg/noble-updates 3.0.5-0ubuntu3.1 amd64
+vsftpd/noble-updates,now 3.0.5-0ubuntu3.1 amd64 [installed]
+controlplane:~$ systemctl status vsftpd
+● vsftpd.service - vsftpd FTP server
+     Loaded: loaded (/usr/lib/systemd/system/vsftpd.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-02-13 11:11:25 UTC; 5min ago
+    Process: 14680 ExecStartPre=/bin/mkdir -p /var/run/vsftpd/empty (code=exited, status=0/SUCCESS)
+   Main PID: 14689 (vsftpd)
+      Tasks: 1 (limit: 2649)
+     Memory: 772.0K (peak: 1.2M)
+        CPU: 18ms
+     CGroup: /system.slice/vsftpd.service
+             └─14689 /usr/sbin/vsftpd /etc/vsftpd.conf
+
+Feb 13 11:11:25 controlplane systemd[1]: Starting vsftpd.service - vsftpd FTP server...
+Feb 13 11:11:25 controlplane systemd[1]: Started vsftpd.service - vsftpd FTP server.
+
+systemctl stop vsftpd 

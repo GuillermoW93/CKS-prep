@@ -1,0 +1,128 @@
+3.) System Hardening
+
+Reducing the Attack Surface
+Limit Access
+Principle of Least Privilege
+Restrict obsolete kernel modules
+Remove obsolete software
+Remove obsolete services
+Identify and fix open ports
+
+Limit Node Access
+Using VPN
+Allowing specific network range (or block it)
+
+id - shows uid and permissions of user
+who - shows who is logged in
+last - shows whos last logged in
+
+/etc/passwd contains users (but not paswords)
+in /etc/shadow it is stored (hashed)
+
+usermod -s /usr/sbin/nologin himanshi
+
+useradd -d /opt/sam -s /bin/bash -G admin -u 2328 sam
+
+SSH Hardening
+/etc/ssh/sshd_config 
+PermitRootLogin: No
+PasswordAuthentication: No
+
+Removing unnecessary software/services
+systemctl list-units —type service
+systemctl disable <service>
+apt remove <service>
+
+Restrict Kernel Modules
+modprobe pcspkr
+lsmod
+cat /etc/modprobe.d/blacklist.conf
+Blacklist scp + dccp
+shutdown -r now
+lsmod | grep scp
+
+Disable Open Ports
+netstat -an | grep -w LISTEN
+verify service used for
+cat /etc/services | grep -W 53
+netstat -natp | grep 9090
+See service with name (to disable)
+
+Restrict Access to External Network
+netstat -an | grep -w LISTEN
+Block using firewall
+
+Uncomplicated Firewall (UFW)
+ufw status
+ufw enable
+ufw status
+‘ufw allow from X to any port 80 proto tcp’
+
+Tracing Syscalls
+which strace
+strace touch /tmp/error.log
+pidof etcd
+strace -p <number of etcd>
+
+Restricting syscalls with seccomp
+seccomp is Linux Kernal feature
+‘grep -i seccomp /boot/config-$(uname -r)’
+
+grep Seccomp /proc/1/status
+Value: 0 = disabled
+Value: 1 = strict
+Value: 2 = filtered
+
+Seccomp in Kubernetes
+spec.securityContext:
+seccomProfile:
+type: RunTimeDefault
+containers:
+SecurityContext:
+allowPrivilegeEscalation: false
+
+By default Kubernetes used seccomprofile (Unconfined)
+
+path: /var/lib/kubelet/seccomp (profiles)
+
+https://kubernetes.io/docs/tutorial/clusters/seccomp
+
+Exam: you may be asked to copy existing seccomp profile to default seccomp location and use it to create pods
+
+Verify syscalls by ‘command’
+strace -c ls /root
+
+Create pod with Seccomp profile
+
+apiVersion: v1 kind: Pod metadata: labels: run: nginx name: audit-nginx spec: securityContext: seccompProfile: type: Localhost localhostProfile: profiles/audit.json containers: - image: nginx name: nginx
+
+AppArmor
+systemctl status apparmor
+cat /sys/modules/apparmor/parameter/enabled
+‘y’ is enabled
+cat /sys/kernel/security/apparmor/profiles
+aa-status (verify status of AppArmor)
+enforce
+complain
+unconfined
+
+Creating AppArmor Profiles
+apt-get install -your apparmor-utils
+aa-genprof
+
+spec.securityContext:
+appArmorProfile:
+type: Localhost
+localhostProfile: <name>
+
+apparmor_parser -q /etc/apparmor.d/usr.sbin.nginx
+Loads profile
+
+LinuxCapabilities
+getcap /usr/bin/ping (shows what capabilities it needs)
+ps -ef | grep /usr/sbin/sshd | grep -v grep
+getpcap <procesid>
+
+
+
+

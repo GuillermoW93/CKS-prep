@@ -1,0 +1,1 @@
+Create a ServiceAccount hidden-user in namespace secret-room that does not automatically mount its token. Verify it by creating a pod that uses it.

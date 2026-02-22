@@ -1,0 +1,34 @@
+# Verify Cilium is present
+
+k get pods -n kube-system
+
+# Create namespaces
+
+k create ns app, data, manage
+
+# Run pods in the namespaces
+
+k run -n app app1 --image=nginx --labels=id=app
+k run -n data data1 --image=nginx --labels=id=data
+k run -n manage manage1 --image=nginx --labels=id=manage
+
+# Create Cilium Policy
+
+apiVersion: "cilium.io/v2"
+kind: CiliumNetworkPolicy
+metadata:
+  name: policy1
+  namespace: app
+spec:
+  endpointSelector:
+    matchLabels: {}
+  egress:
+    toEndPoints:
+    - matchLabels
+        io.kubernetes.pod.namespace: data
+        id: data
+
+Reference: https://docs.cilium.io/en/stable/gettingstarted/demo/#apply-an-l3-l4-policy
+
+
+

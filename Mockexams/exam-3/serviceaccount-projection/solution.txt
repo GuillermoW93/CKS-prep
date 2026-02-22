@@ -1,0 +1,35 @@
+First create a pod:
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cks-projected-token-lab
+spec:
+  # 1. CKS Best Practice: Disable default automounting
+  automountServiceAccountToken: false
+  
+  containers:
+  - name: nginx
+    image: nginx:alpine
+    # 2. Mount the volume into the container
+    volumeMounts:
+    - name: sa-token-volume
+      mountPath: /var/run/secrets/custom-tokens
+      readOnly: true
+
+  volumes:
+  - name: sa-token-volume
+    projected:
+      sources:
+      - serviceAccountToken:
+          path: token # The file name inside the mountPath
+          expirationSeconds: 3600 # Token expires in 1 hour
+          # audience: my-app # (Optional) Limits who trusts this token
+
+Apply it using:
+- kubectl apply -f secure-pod.yaml
+
+Verify that the mount is available:
+- kubectl exec cks-projected-token-lab -- ls -l /var/run/secrets/custom-tokens/
+
+

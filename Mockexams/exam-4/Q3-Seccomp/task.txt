@@ -1,0 +1,3 @@
+Create a custom Seccomp profile that logs (but doesn't block) the mkdir syscall. Apply it to a pod
+
+Note: For k3s, default seccomp path is /var/lib/rancher/k3s/agent/containerd/io.containerd.grpc.v1.cri/seccomp (you might need to create this dir).

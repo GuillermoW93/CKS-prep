@@ -1,0 +1,49 @@
+# Verify the given Dockerfile 
+
+FROM ubuntu:latest # Remove this
+FROM ubuntu:18.04 # Add this
+USER root # Remove this
+USER nobody # Add this
+RUN apt get install -y lsof=4.72 wget=1.17.1 nginx=4.2
+ENV ENVIRONMENT=testing
+USER root # Remove this
+USER nobody # Add this
+CMD ["nginx -d"]
+
+# Verify the given Deployment.yaml
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+creationTimestamp: null
+labels:
+app: kafka
+name: kafka
+spec:
+replicas: 1
+selector:
+matchLabels:
+app: kafka
+strategy: {}
+template:
+metadata:
+creationTimestamp: null
+labels:
+app: kafka
+spec:
+containers:
+- image: bitnami/kafka
+name: kafka
+volumeMounts:
+- name: kafka-vol
+mountPath: /var/lib/kafka
+securityContext:
+{"capabilities":{"add":["NET_ADMIN"],"drop":["all"]},"privileged": True,"readOnlyRootFilesystem":
+False, "runAsUser": 65535} # Delete This
+{"capabilities":{"add":["NET_ADMIN"],"drop":["all"]},"privileged": False,"readOnlyRootFilesystem":
+True, "runAsUser": 65535} # Add This resources: {} volumes:
+- name: kafka-vol
+emptyDir: {}
+status: {}
+
+## Delete the priviled True!  

@@ -1,0 +1,50 @@
+controlplane:~$ k create secret generic holy --from-literal=creditcard=1111222233334444
+secret/holy created
+
+controlplane:~$ k apply -f /opt/ks/secret-diver.yaml 
+secret/diver created
+
+-----
+
+Reference: https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+
+k run pod1 --image=nginx --dry-run=client -o yaml > pod.yaml
+
+  1 apiVersion: v1
+  2 kind: Pod
+  3 metadata:
+  4   labels:
+  5     run: pod1
+  6   name: pod1
+  7 spec:
+  8   containers:
+  9   - image: nginx
+ 10     name: pod1
+ 11     resources: {}
+ 12     env:
+ 13     - name: holy
+ 14       valueFrom:
+ 15         secretKeyRef:
+ 16           name: holy
+ 17           key: holy
+ 18   
+ 19     volumeMounts:
+ 20         - name: diver
+ 21           mountPath: /etc/diver/hosts
+ 22           readOnly: true
+ 23   volumes:
+ 24     - name: diver
+ 25       secret:
+ 26         secretName: diver
+ 27   dnsPolicy: ClusterFirst
+ 28   restartPolicy: Always
+ 29 status: {}
+
+controlplane:~$ k exec -it pod/pod1 -- sh
+# echo $HOLY
+1111222233334444
+
+ls -l /etc/diver
+total 0
+lrwxrwxrwx 1 root root 12 Feb 13 10:24 hosts -> ..data/hosts
+# 

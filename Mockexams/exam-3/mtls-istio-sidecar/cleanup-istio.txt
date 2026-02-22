@@ -1,0 +1,5 @@
+istioctl uninstall --purge -y
+
+kubectl delete namespace istio-system
+
+kubectl label namespace restricted-zone istio-injection-

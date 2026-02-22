@@ -1,0 +1,100 @@
+Reference: https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/
+
+ls -l /etc/kubernetes/etcd
+ls: cannot access '/etc/kubernetes/etcd': No such file or directory
+
+mkdir -p /etc/kubernetes/etcd
+
+echo -n this-is-very-sec | base64
+dGhpcy1pcy12ZXJ5LXNlYw==
+
+apiVersion: apiserver.config.k8s.io/v1
+kind: EncryptionConfiguration
+resources:
+  - resources:
+      - secrets
+    providers:
+      - aescbc:
+          keys:
+            - name: key1
+              secret: dGhpcy1pcy12ZXJ5LXNlYw==
+      - identity: {}
+
+mv ec.yaml /etc/kubernetes/etcd/
+
+controlplane:~$ ls -l /etc/kubernetes/etcd/
+total 4
+-rw-r--r-- 1 root root 252 Feb 13 10:01 ec.yaml
+
+Add the line to /etc/kubernetes/manifests/kube-apiserver.yaml
+- --encryption-provider-config=/etc/kubernetes/etcd/ec.yaml
+
+Make sure to add the volume and volumeMount
+
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+...
+    - --encryption-provider-config=/etc/kubernetes/etcd/ec.yaml
+...
+    volumeMounts:
+    - mountPath: /etc/kubernetes/etcd
+      name: etcd
+      readOnly: true
+...
+  hostNetwork: true
+  priorityClassName: system-cluster-critical
+  volumes:
+  - hostPath:
+      path: /etc/kubernetes/etcd
+      type: DirectoryOrCreate
+    name: etcd
+
+------------
+
+If you create or update secrets they are automatically encryted on ETCD. 
+
+kubectl -n one get secrets -o json | kubectl replace -f -
+kubectl -n two get secrets -o json | kubectl replace -f -
+kubectl -n three get secrets -o json | kubectl replace -f -
+
+ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/one/s1
+/registry/secrets/one/s1
+k8s:enc:aescbc:v1:key1:xU5 bVB*m1Ѐ ߬`S   AFpOrZ[8-w^.lq/Y        7=Vj3?ŏ
+                                                                       ,l       C?aiyE-[(zn;VkP
+*XWok2P9;}^_z}*l1/g0_鬛\W:;uRL@ueA
+                                  jq/ѿ
+controlplane:~$ 
+
+controlplane:~$ ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/one/s2
+/registry/secrets/one/s2
+;C}wknc:aescbc:v1:key1:QD%uG5JPk
+     #SS*&f]{O
+@r#whCrUUT&fXkި^;=&r&絼RǻPL:S;!rd͂4k#adJu^K;eTwzGXq߼|
+                                                   i튠
+                                                      Ecŗ#sCc?K4o@v#"t%Im߬P.* 7T
+controlplane:~$ ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/two/secret1
+/registry/secrets/two/secret1
+k8s:enc:aescbc:v1:key1:GK
+controlplane:~$ ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/two/secret2
+/registry/secrets/two/secret2
+k8s:enc:aescbc:v1:key1:Mjs9\6K?zY-CmGt!d
+);f
+   --nF;^PQ
+JY3Dvռc燙&%wfK>r2)EUdxì1v9k15Klx*}YV|Ӈ^q!H)G/ŷΓ/8rO8khVLG%^}DP+A
+controlplane:~$ ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/three/con1   
+/registry/secrets/three/con1
+2&Ҽhl7L#=Y}cbc:v1:key1:[S$!릇sx\        &VeA0X
+0Rz     x<<`3%1kzl)c <
+̍4O/I
+FHML5c#@f[\F_>5!x-A_{
+                      "n.6w747g]d{+-R<
+controlplane:~$ ETCDCTL_API=3 etcdctl --cert /etc/kubernetes/pki/apiserver-etcd-client.crt --key /etc/kubernetes/pki/apiserver-etcd-client.key --cacert /etc/kubernetes/pki/etcd/ca.crt get /registry/secrets/three/con2
+/registry/secrets/three/con2
+k8s:enc:aescbc:v1:key1:en
+ioєn
+    L»y'Rg
+          *WxXrWS{Oylµs1
+ows/ZW4qW/G&|+21
+]kp)L0]@\       mqY]5D5RC\}D|ň ƛաԢy_Na-!]w|>#b.x=B^k3

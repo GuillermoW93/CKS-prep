@@ -1,0 +1,110 @@
+Reference: https://docs.cilium.io/en/stable/
+
+root@controlplane ~ ➜  helm repo add cilium https://helm.cilium.io/
+"cilium" has been added to your repositories
+
+root@controlplane ~ ➜  helm install cilium cilium/cilium --version v1.18.0-pre.0   --namespace kube-system   --set encryption.enabled=true   --set encryption.type=wireguard
+I0213 21:39:14.016053    5867 warnings.go:107] "Warning: spec.SessionAffinity is ignored for headless services"
+NAME: cilium
+LAST DEPLOYED: Fri Feb 13 21:39:13 2026
+NAMESPACE: kube-system
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+You have successfully installed Cilium with Hubble.
+
+Your release version is 1.18.0-pre.0.
+
+For any further help, visit https://docs.cilium.io/en/v1.18/gettinghelp
+
+root@controlplane ~ ➜  cilium status
+    /¯¯\
+ /¯¯\__/¯¯\    Cilium:             1 warnings
+ \__/¯¯\__/    Operator:           OK
+ /¯¯\__/¯¯\    Envoy DaemonSet:    OK
+ \__/¯¯\__/    Hubble Relay:       disabled
+    \__/       ClusterMesh:        disabled
+
+DaemonSet              cilium                   Desired: 2, Ready: 2/2, Available: 2/2
+DaemonSet              cilium-envoy             Desired: 2, Ready: 2/2, Available: 2/2
+Deployment             cilium-operator          Desired: 2, Ready: 2/2, Available: 2/2
+Containers:            cilium                   Running: 2
+                       cilium-envoy             Running: 2
+                       cilium-operator          Running: 2
+                       clustermesh-apiserver    
+                       hubble-relay             
+Cluster Pods:          1/2 managed by Cilium
+Helm chart version:    1.18.0-pre.0
+Image versions         cilium             quay.io/cilium/cilium:v1.18.0-pre.0@sha256:88711d5016c6969e47e92e5f499ccd80e3df93ab52bdd7bc321c2b4a6a434a9e: 2
+                       cilium-envoy       quay.io/cilium/cilium-envoy:v1.32.3-1740976227-c3c35d52ca3b699de1f9448ab7174a9bdcb13f69@sha256:92af281c1904a1b7afab350a7bb0c6eee6cb2383eb74734b7cdd181927b8c034: 2
+                       cilium-operator    quay.io/cilium/operator-generic:v1.18.0-pre.0@sha256:b1f1d0b3278efd8f9774d87d317f25a145fd165f22b19403bc6b92db750cea8a: 2
+Warnings:              cilium             cilium-gzhcp    2 endpoints are not ready
+
+root@controlplane ~ ➜  cilium encryption status
+Encryption: Wireguard (2/2 nodes)
+
+----------
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx
+        name: nginx
+        ports:
+        - containerPort: 80
+        resources: {}
+status: {}
+
+root@controlplane ~ ➜  k expose deployment nginx
+service/nginx exposed
+
+root@controlplane ~ ➜  k get svc
+NAME         TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.96.0.1      <none>        443/TCP   64m
+nginx        ClusterIP   10.98.172.18   <none>        80/TCP    2s
+
+k run curlpod --image=rapidfort/curl --labels=app=curlpod --command sleep 3600
+pod/curlpod created
+
+---------
+
+Verify connectivity
+
+
+root@controlplane ~ ➜  kubectl -n kube-system exec -ti ds/cilium -- bash 
+Defaulted container "cilium-agent" out of: cilium-agent, config (init), mount-cgroup (init), apply-sysctl-overwrites (init), mount-bpf-fs (init), clean-cilium-state (init), install-cni-binaries (init)
+root@controlplane:/home/cilium# cilium-dbg status | grep Encryption
+Encryption:              Wireguard       [NodeEncryption: Disabled, cilium_wg0 (Pubkey: 0SmesMnNYMDiQ3MAOotla0v0I6cwQVIhpzTuNJ5HaEY=, Port: 51871, Peers: 1)]
+
+root@controlplane:/home/cilium# apt-get update && apt-get -y install tcpdump
+
+tcpdump -n -i cilium_wg0 -X 
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on cilium_wg0, link-type RAW (Raw IP), snapshot length 262144 bytes
+21:47:57.910010 IP 192.168.121.243.41284 > 192.168.121.82.8472: OTV, flags [I] (0x08), overlay 0, instance 62776
+IP 10.0.0.8.44369 > 10.0.1.46.53: 20564+ A? nginx.default.svc.cluster.local. (49)
+        0x0000:  4500 007f f888 0000 4011 0d4f c0a8 79f3  E.......@..O..y.
+        0x0010:  c0a8 7952 a144 2118 006b 0000 0800 0000  ..yR.D!..k......
+        0x0020:  00f5 3800 1279 32ed caea 06ee d144 9cfa  ..8..y2......D..
+        0x0030:  0800 4500 004d c1e4 4000 4011 6386 0a00  ..E..M..@.@.c...
+        0x0040:  0008 0a00 012e ad51 0035 0039 3695 5054  .......Q.5.96.PT
+        0x0050:  0100 0001 0000 0000 0000 056e 6769 6e78  ...........nginx
+        0x0060:  0764 6566 6175 6c74 0373 7663 0763 6c75  .default.svc.clu
+        0x0070:  7374 6572 056c 6f63 616c 0000 0100 01    ster.local.....
+21:47:57.910163 IP 192.168.121.243.41284 > 192.168.121.82.8472: OTV, flag

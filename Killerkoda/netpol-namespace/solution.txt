@@ -1,0 +1,94 @@
+k get ns --show-labels
+default              Active   11d   kubernetes.io/metadata.name=default
+kube-node-lease      Active   11d   kubernetes.io/metadata.name=kube-node-lease
+kube-public          Active   11d   kubernetes.io/metadata.name=kube-public
+kube-system          Active   11d   kubernetes.io/metadata.name=kube-system
+local-path-storage   Active   11d   kubernetes.io/metadata.name=local-path-storage
+space1               Active   28s   kubernetes.io/metadata.name=space1
+space2               Active   28s   kubernetes.io/metadata.name=space2
+
+k get pods -n space1 --show-labels
+NAME     READY   STATUS    RESTARTS   AGE     LABELS
+app1-0   1/1     Running   0          3m14s   app=app1,apps.kubernetes.io/pod-index=0,controller-revision-hash=app1-76d4566b4f,statefulset.kubernetes.io/pod-name=app1-0
+
+
+  1 apiVersion: networking.k8s.io/v1
+  2 kind: NetworkPolicy
+  3 metadata:
+  4   name: np
+  5   namespace: space1
+  6 spec:
+  7   podSelector: {}
+  8   policyTypes:
+  9   - Egress
+ 10   egress:
+ 11   - to:
+ 12     - namespaceSelector:
+ 13         matchLabels:
+ 14           kubernetes.io/metadata.name: space2
+ 15   - ports:
+ 16     - protocol: TCP
+ 17       port: 53
+ 18     - protocol: UDP
+ 19       port: 53
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: np
+  namespace: space2
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: space1
+
+Verify:
+
+k get pods -n space1 --show-labels
+NAME     READY   STATUS    RESTARTS   AGE     LABELS
+app1-0   1/1     Running   0          8m36s   app=app1,apps.kubernetes.io/pod-index=0,controller-revision-hash=app1-76d4566b4f,statefulset.kubernetes.io/pod-name=app1-0
+
+controlplane:~$ k get pods -n space2 --show-labels
+NAME              READY   STATUS    RESTARTS   AGE     LABELS
+microservice1-0   1/1     Running   0          8m39s   app=microservice1,apps.kubernetes.io/pod-index=0,controller-revision-hash=microservice1-5779ddc59c,statefulset.kubernetes.io/pod-name=microservice1-0
+microservice2-0   1/1     Running   0          8m39s   app=microservice2,apps.kubernetes.io/pod-index=0,controller-revision-hash=microservice2-7654b98958,statefulset.kubernetes.io/pod-name=microservice2-0
+
+
+k exec -it -n space1 app1-0 -- curl microservice1.space2.svc.cluster.local
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+k -n default run nginx --image=nginx:1.21.5-alpine -i  -- curl -m 1 microservice1.space2.svc.clust
+er.local
+All commands and output from this session will be recorded in container logs, including credentials and sensitive information passed through the command prompt.
+If you don't see a command prompt, try pressing enter.
+  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
+curl: (28) Connection timed out after 1000 milliseconds
+
+This proofs that a pod that is not in namespace: "space1" cannot reach pods in namespace: "space2"

@@ -1,0 +1,1 @@
+Install Falco (if not present) and update the rules to output "CRITICAL: SHELL OPENED" when someone execs into a pod.

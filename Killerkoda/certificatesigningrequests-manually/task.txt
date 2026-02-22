@@ -1,0 +1,14 @@
+In the first step we'll create a CSR and in the second step we'll manually sign the CSR with the K8s CA file.
+
+The idea here is to create a new "user" that can communicate with K8s.
+
+For this now:
+
+Create a new KEY at /root/60099.key for user named 60099@internal.users
+Create a CSR at /root/60099.csr for the KEY
+
+----
+
+Manually sign the CSR with the K8s CA file to generate the CRT at /root/60099.crt .
+
+Create a new context for kubectl named 60099@internal.users which uses this CRT to connect to K8s.

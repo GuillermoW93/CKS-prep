@@ -1,0 +1,20 @@
+# Question
+
+Remove a Linux user called “developer” from the "docker" group. And also deny tcp traffic from docker daemon. 
+
+# Answer
+
+sudo gpasswd -d developer docker ## deletes the docker user from the docker group
+
+## verify by runnning 'id developer' nomore docker group assigned
+
+
+Verify TCP is enabled
+
+systemctl status docker ## look at ExecStart (tcp://...)
+
+vi /lib/systemd/system/docker.service or /etc/systemd/system/docker.service
+## delete the part '-H tcp:// in the lin' ExecStart=
+
+sudo systemctl daemon-reload
+sudo systemctl restart docker

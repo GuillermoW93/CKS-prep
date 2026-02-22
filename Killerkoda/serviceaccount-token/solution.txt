@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-one
+  namespace: one
+spec:
+  serviceAccountName: custom
+  automountServiceAccountToken: false
+  containers:
+  - name: webserver
+    image: nginx:1.19.6-alpine
+    ports:
+    - containerPort: 80
+
+Reference: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+
+k exec -it pod/pod-one -n one -- sh 
+/ # cat /var/run/secrets/kubernetes.io/serviceaccount/token
+cat: can't open '/var/run/secrets/kubernetes.io/serviceaccount/token': No such file or directory 
+
+
+------
+kubectl -n two edit sa default
+
+Add the following line: 
+- automountServiceAccountToken: false
+
+kubectl -n two exec -it pod-two -- cat /var/run/secrets/kubernetes.io/serviceaccount/token
+cat: can't open '/var/run/secrets/kubernetes.io/serviceaccount/token': No such file or directory
+command terminated with exit code 1

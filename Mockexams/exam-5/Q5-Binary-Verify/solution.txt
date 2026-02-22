@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: verify-bin
+  namespace: binary-verify
+spec:
+  containers:
+    - name: busybox
+      image: busybox
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          sha256sum /host-bin/kubectl >> /tmp/verified-hashes.txt
+          sha256sum /host-bin/kubelet >> /tmp/verified-hashes.txt
+          sleep 3600
+      volumeMounts:
+        - name: host-bin
+          mountPath: /host-bin
+          readOnly: true
+  volumes:
+    - name: host-bin
+      hostPath:
+        path: /usr/bin
+        type: Directory

@@ -1,0 +1,140 @@
+Reference: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+
+k run prime --image=nginx:alpine --dry-run=client -o yaml > pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: prime
+  name: prime
+spec:
+  containers:
+  - image: nginx:alpine
+    name: prime
+    resources: {}
+    securityContext:
+      privileged: true
+    command: ["/bin/sh"]
+    args: ["-c", "apk add iptables", "iptables -L"]
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+k get pods
+NAME    READY   STATUS    RESTARTS   AGE
+prime   1/1     Running   0          2s
+
+controlplane:~$ k logs pods/prime
+(1/4) Installing libmnl (1.0.5-r2)
+(2/4) Installing libnftnl (1.3.0-r0)
+(3/4) Installing libxtables (1.8.11-r1)
+(4/4) Installing iptables (1.8.11-r1)
+Executing busybox-1.37.0-r30.trigger
+OK: 60.9 MiB in 76 packages
+
+Alternatively, you can do it via: 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: prime
+  name: prime
+spec:
+  containers:
+  - image: nginx:alpine
+    name: prime
+    resources: {}
+    securityContext:
+      privileged: true
+    command:
+    - sh
+    - -c
+    - sleep 1d
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+k exec -it pod/prime -- sh
+/ # whoami
+root
+
+/ # apk add iptables
+(1/4) Installing libmnl (1.0.5-r2)
+(2/4) Installing libnftnl (1.3.0-r0)
+(3/4) Installing libxtables (1.8.11-r1)
+(4/4) Installing iptables (1.8.11-r1)
+Executing busybox-1.37.0-r30.trigger
+OK: 60.9 MiB in 76 packages
+
+/ # iptables -L
+Chain INPUT (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain FORWARD (policy ACCEPT)
+target     prot opt source               destination         
+
+Chain OUTPUT (policy ACCEPT)
+target     prot opt source               destination
+
+-----
+
+This is the file we are provided with: 
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: habanero
+spec:
+  selector:
+    matchLabels:
+      app: habanero
+  serviceName: habanero
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: habanero
+    spec:
+      securityContext:
+        privileged: true
+      containers:
+        - name: habanero
+          image: nginx:alpine
+          command:
+            - sh
+            - -c
+            - apk add iptables && sleep 1d
+
+What's wrong?
+
+k apply -f /application/sts.yaml 
+Error from server (BadRequest): error when creating "/application/sts.yaml": StatefulSet in version "v1" cannot be handled as a StatefulSet: strict decoding error: unknown field "spec.template.spec.securityContext.privileged"
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: habanero
+spec:
+  selector:
+    matchLabels:
+      app: habanero
+  serviceName: habanero
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: habanero
+    spec:
+     containers:
+        - name: habanero
+          image: nginx:alpine
+          command:
+            - sh
+            - -c
+            - apk add iptables && sleep 1d
+          securityContext:
+            privileged: true
+
+We should move the SecurityContext part 'inside' the container definition section. 

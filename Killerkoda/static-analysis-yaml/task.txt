@@ -1,0 +1,19 @@
+Manually Analyse K8s YAML files
+
+Perform a manual static analysis on files /root/apps/app1-* considering security.
+
+Move the less secure file to /root/insecure
+
+------
+
+Perform a manual static analysis on files /root/apps/app2-* considering security.
+
+Move the less secure file to /root/insecure
+
+------
+
+Perform a manual static analysis on files /root/apps/app3-* considering security.
+
+Move the less secure file to /root/insecure
+
+

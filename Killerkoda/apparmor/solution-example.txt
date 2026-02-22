@@ -1,0 +1,29 @@
+Apply this to /etc/apparmor.d/deny
+
+#include <tunables/global>
+
+profile k8s-apparmor-example-deny-write flags=(attach_disconnected) {
+  #include <abstractions/base>
+
+  file,
+
+  # Deny all file writes.
+  audit deny /** w,
+}
+
+This logs the deny.
+
+Run: apparmor_parser -q (-r if already applied so it reloads) /etc/apparmor.d/deny
+
+k exec -it pod/pod -- touch /tmp/test
+
+journal -k | grep denied
+- journalctl -k | grep denied
+Feb 13 14:19:07 k3s kernel: audit: type=1400 audit(1770992347.521:119): apparmor="DENIED" operation="mknod" class="file" profile="k8s-apparmor-example-deny-write" name="/tmp/test" pid=717191 comm="touch" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+Feb 13 14:19:18 k3s kernel: audit: type=1400 audit(1770992358.937:120): apparmor="DENIED" operation="mknod" class="file" profile="k8s-apparmor-example-deny-write" name="/tmp/test" pid=717197 comm="touch" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+Feb 13 14:19:19 k3s kernel: audit: type=1400 audit(1770992359.333:121): apparmor="DENIED" operation="mknod" class="file" profile="k8s-apparmor-example-deny-write" name="/tmp/test" pid=717198 comm="touch" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+Feb 13 14:22:05 k3s kernel: audit: type=1400 audit(1770992525.032:122): apparmor="DENIED" operation="mknod" class="file" profile="k8s-apparmor-example-deny-write" name="/tmp/test" pid=717651 comm="touch" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+Feb 13 14:22:08 k3s kernel: audit: type=1400 audit(1770992528.348:123): apparmor="DENIED" operation="mknod" class="file" profile="k8s-apparmor-example-deny-write" name="/root/.ash_history" pid=716124 comm="sh" requested_mask="c" denied_mask="c" fsuid=0 ouid=0
+root@k3s:~# 
+
+

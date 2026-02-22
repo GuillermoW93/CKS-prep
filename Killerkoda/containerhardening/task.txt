@@ -1,0 +1,12 @@
+There is a Dockerfile at /root/image/Dockerfile .
+
+It’s a simple container which tries to make a curl call to an imaginary api with a secret token, the call will 404 , but that's okay.
+
+Use specific version 20.04 for the base image
+Remove layer caching issues with apt-get
+Remove the hardcoded secret value 2e064aad-3a90–4cde-ad86–16fad1f8943e . The secret value should be passed into the container during runtime as env variable TOKEN
+Make it impossible to podman exec , docker exec or kubectl exec into the container using bash
+You can build the image using
+
+cd /root/image
+podman build .

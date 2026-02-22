@@ -1,0 +1,10 @@
+- rule: Check if fd.name is /dev/mem
+  desc: Detect any attempt to access /dev/mem/
+  condition: fd.name = "/dev/mem"
+  output: "Sensitive file opened (user=%user.name command=%proc.cmdline file=%fd.name)"
+  priority: WARNING
+
+falco -v /etc/falco/falco_rules.local.yaml
+- Verify its working
+
+Check logs

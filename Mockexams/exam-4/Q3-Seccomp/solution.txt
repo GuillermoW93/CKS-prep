@@ -1,0 +1,24 @@
+cp audit.json /var/lib/kubelet/seccomp/
+
+Verify that seccomp is running: 
+
+crictl ps --name test-container
+CONTAINER           IMAGE               CREATED              STATE               NAME                ATTEMPT             POD ID              POD                 NAMESPACE
+c43eb258884cc       cbad6347cca28       About a minute ago   Running             test-container      0                   ce816fcee0d87       audit-pod           default
+
+root@k3s:~/CKS/Q3-Seccomp# crictl inspect c43eb258884cc | grep seccomp
+          "seccomp": {
+            "localhost_ref": "/var/lib/kubelet/seccomp/audit.json",
+        "seccomp": {
+
+Next, verify that it's working: 
+
+Execute an 'mkdir' command in the container:
+- kubectl exec -it audit-pod -- mkdir /tmp/test-trigger
+
+Verify that's it's logged
+
+journalctl -kf | grep "mkdir"
+Feb 10 15:47:22 k3s kernel: audit: type=1326 audit(1770738442.621:114): auid=4294967295 uid=0 gid=0 ses=4294967295 subj=cri-containerd.apparmor.d pid=16380 comm="mkdir" exe="/bin/busybox" sig=0 arch=c00000b7 syscall=34 compat=0 ip=0x7f7fd44b0c code=0x7ffc0000
+
+

@@ -1,0 +1,19 @@
+# Test 
+
+curl -sk https://localhost:10250/pods
+
+# Secure the Kubelet by setting anonymous to false
+
+/var/lib/kubelet/config.yaml
+
+--anonymous=false
+
+authorization:
+  mode: Webhook
+
+readOnlyPort: 0
+
+# Test again
+
+curl -sk https://localhost:10250/pods
+curl -sk https://localhost:10255/metrics

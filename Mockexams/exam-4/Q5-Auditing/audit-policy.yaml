@@ -1,0 +1,8 @@
+apiVersion: audit.k8s.io/v1 # This is required.
+kind: Policy
+rules:
+  # Log configmap and secret changes in all other namespaces at the Metadata level.
+  - level: Metadata
+    resources:
+    - group: "" # core API group
+      resources: ["secrets"]

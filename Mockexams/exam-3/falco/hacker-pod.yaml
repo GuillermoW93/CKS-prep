@@ -1,0 +1,12 @@
+# hacker-pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hacker-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["sh", "-c", "sleep 3600"]
+    securityContext:
+      privileged: true # Needed to access /dev/mem

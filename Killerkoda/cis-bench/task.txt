@@ -1,0 +1,7 @@
+Use kube-bench to ensure 1.2.15 has status PASS.
+
+Use kube-bench to ensure 1.3.2 has status PASS.
+
+Use kube-bench to ensure 1.1.19 has status PASS.
+
+

@@ -1,0 +1,15 @@
+Understand strace and use it to investigate the Apiserver
+
+Use strace to see which syscalls the following commands perform:
+
+kill -9 1234
+
+kill -15 1234
+
+uname
+
+nc -l -p 8080
+
+----
+
+Use strace to see what kind of syscalls the kube-apiserver process performs.

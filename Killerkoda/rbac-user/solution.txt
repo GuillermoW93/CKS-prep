@@ -1,0 +1,17 @@
+k -n applications create role smoke --verb create,delete --resource pods,deployments,sts
+k -n applications create rolebinding smoke --role smoke --user smoke
+
+Next, we take the 'role' view and apply it using a rolebinding to our use and all namespaces, except the kube-system.
+
+k -n applications create rolebinding smoke-view --clusterrole view --user smoke
+k -n default create rolebinding smoke-view --clusterrole view --user smoke
+k -n kube-node-lease create rolebinding smoke-view --clusterrole view --user smoke
+k -n kube-public create rolebinding smoke-view --clusterrole view --user smoke
+
+The part of 'seeing' Secret names is NOT possible: 
+
+This is NOT POSSIBLE using plain K8s RBAC. You might think of doing this:
+
+k -n applications create role list-secrets --verb list --resource secrets
+
+Having the list verb you can simply run kubectl get secrets -oyaml and see all content. Dangerous misconfiguration!

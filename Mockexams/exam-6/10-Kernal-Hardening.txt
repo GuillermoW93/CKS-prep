@@ -1,0 +1,62 @@
+# Strace
+
+strace -p <pid> ## trace process with process id 
+strace -c kill <pid> ## count the process and kill it
+
+# AppArmor
+
+apparmor_parser /root/apparmor (load profile)
+
+apparmor_status | grep <profile> # check if loaded
+
+vi pod.yaml 
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hello-apparmor
+spec:
+  securityContext:
+    appArmorProfile:
+      type: Localhost
+      localhostProfile: k8s-apparmor-example-deny-write
+  containers:
+  - name: hello
+    image: busybox
+    command: ["sh", "-c", "echo 'Hello AppArmor!' && sleep 1h"]
+
+Apply the pod and test it out!
+
+'k apply -f pod.yaml && k exec -it pods/hello -- /bin/sh'
+## mkdir test
+mkdir: can't create directory: 'test': Permission Denied
+
+# Seccomp
+
+Reference: https://kubernetes.io/docs/tutorials/security/seccomp/
+
+vi /var/lib/kubelet/seccomp/restrict.json
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: audit-pod
+  labels:
+    app: audit-pod
+spec:
+  securityContext:
+    seccompProfile:
+      type: Localhost
+      localhostProfile: profiles/audit.json
+  containers:
+  - name: test-container
+    image: hashicorp/http-echo:1.0
+    args:
+    - "-text=just made some syscalls!"
+    securityContext:
+      allowPrivilegeEscalation: false
+
+k exec -it pods/audit-pod -- /bin/bash 
+## mount -t tmpfs -o size=512M tmpfs /mnt/tmp
+mount: /mnt/tmp: Permission Denied
+dmesg(1): may have more information after failed mount system call

@@ -1,0 +1,165 @@
+# Apply the following Namespace
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: falco-dev-mem-demo
+
+# Apply the deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-gpu-amd
+  namespace: falco-dev-mem-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falco-gpu-amd
+  template:
+    metadata:
+      labels:
+        app: falco-gpu-amd
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c", "sleep 3600"]
+
+
+# Apply the demo nvidia deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-gpu-nvidia
+  namespace: falco-dev-mem-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falco-gpu-nvidia
+  template:
+    metadata:
+      labels:
+        app: falco-gpu-nvidia
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: ["/bin/sh", "-c", "sleep 3600"]
+
+# Apply the demo mem deployment
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: falco-cpu
+  namespace: falco-dev-mem-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: falco-cpu
+  template:
+    metadata:
+      labels:
+        app: falco-cpu
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        securityContext:
+          privileged: true
+        command:
+          - /bin/sh
+          - -c
+          - |
+            echo "[+] creating fake memory file in /tmp"
+            dd if=/dev/urandom of=/tmp/mem bs=1K count=4
+            echo "[+] reading /tmp/mem in a loop"
+            while true; do
+              cat /tmp/mem > /dev/null
+              sleep 10
+            done
+
+# Create the ConfigMap for the rule
+
+custom-falco-rule.yaml
+
+- rule: Detect /tmp/mem Access
+  desc: Detect processes that attempt to read /tmp/mem
+  condition: >
+    (evt.type = open or evt.type = openat)
+    and fd.name = /tmp/mem
+  output: >
+    Process %proc.name accessed /tmp/mem
+    (cmd=%proc.cmdline user=%user.name
+    container=%container.id image=%container.image.repository)
+  priority: WARNING
+  tags: [security]
+
+kubectl -n falco create configmap falco-custom-rules \
+  --from-file=custom-falco-rule.yaml
+
+# Edit the DaemonSet manifest
+
+kubectl -n falco edit daemonset falco
+
+Add the volumeMount/volume:
+
+volumeMounts:
+  - mountPath: /etc/falco/rules.d/custom-falco-rule.yaml
+    name: custom-rules
+    subPath: custom-falco-rule.yaml
+
+volumes:
+  - name: custom-rules
+    configMap:
+      name: falco-custom-rules
+      defaultMode: 420
+
+# Reroll the daemonset
+
+kubectl -n falco rollout restart daemonset falco
+
+# Verify
+
+kubectl -n falco rollout restart daemonset falco
+
+----
+
+root@k3s:~# sudo falco -U
+Tue Feb 17 08:15:15 2026: Falco version: 0.43.0 (aarch64)
+Tue Feb 17 08:15:15 2026: Falco initialized with configuration files:
+Tue Feb 17 08:15:15 2026:    /etc/falco/config.d/engine-kind-falcoctl.yaml | schema validation: ok
+Tue Feb 17 08:15:15 2026:    /etc/falco/config.d/falco.container_plugin.yaml | schema validation: ok
+Tue Feb 17 08:15:15 2026:    /etc/falco/falco.yaml | schema validation: failed for <root>[file_output][enabled]: Value type not permitted by 'type' constraint.
+Tue Feb 17 08:15:15 2026: System info: Linux version 6.12.47+rpt-rpi-v8 (serge@raspberrypi.com) (aarch64-linux-gnu-gcc-14 (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT Debian 1:6.12.47-1+rpt1 (2025-09-16)
+Tue Feb 17 08:15:16 2026: Loaded plugin 'container@0.6.1' from file /usr/share/falco/plugins/libcontainer.so
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'podman' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/podman/podman.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'docker' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/var/run/docker.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'cri' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/containerd/containerd.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/crio/crio.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/k3s/containerd/containerd.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/host-containerd/containerd.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'containerd' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: * enabled container runtime socket at '/run/host-containerd/containerd.sock'
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'lxc' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'libvirt_lxc' container engine.
+Tue Feb 17 08:15:16 2026: [libs]: container: Enabled 'bpm' container engine.
+Tue Feb 17 08:15:16 2026: Loading rules from:
+Tue Feb 17 08:15:16 2026:    /etc/falco/falco_rules.yaml | schema validation: ok
+Tue Feb 17 08:15:16 2026:    /etc/falco/falco_rules.local.yaml | schema validation: ok
+Tue Feb 17 08:15:16 2026: The chosen syscall buffer dimension is: 8388608 bytes (8 MBs)
+Tue Feb 17 08:15:16 2026: Starting health webserver with threadiness 4, listening on 0.0.0.0:8765
+Tue Feb 17 08:15:16 2026: Loaded event sources: syscall
+Tue Feb 17 08:15:16 2026: Enabled event sources: syscall
+Tue Feb 17 08:15:16 2026: Opening 'syscall' source with Kernel module
+Tue Feb 17 08:15:16 2026: [libs]: Trying to open the right engine!
+08:16:12.011451712: Notice A shell was spawned in a container with an attached terminal | evt_type=execve user=root user_uid=0 user_loginuid=-1 process=sh proc_exepath=/bin/sh parent=containerd-shim command=sh terminal=34816 exe_flags=EXE_WRITABLE|EXE_LOWER_LAYER container_id=022ea2477259 container_name=busybox container_image_repository=docker.io/library/busybox container_image_tag=latest k8s_pod_name=hacker-pod k8s_ns_name=default
+

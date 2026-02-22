@@ -1,0 +1,38 @@
+# Question
+
+A pod has been created in the "spectacle" namespace. However, there are a couple of issues with it:
+
+The pods has been created with privileged permissions
+
+it allows read access
+
+Use the AppArmor profile created at /etc/apparmor.d/spectacleapp
+
+create a service account in the spectacle namespace called "test-sa" and use this service account on the pod
+
+# Solution
+
+k create sa -n spectacle test-sa
+
+apparmor_parser -q /etc/apparmor.d/spectacleapp
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: apparmor-pod
+  namespace: spectacle
+spec:
+  serviceAccountName: test-sa ## use the created service account
+  containers:
+  - image: nginx:alpine
+    name: nginx
+    securityContext:
+      type: Localhost
+      localhostProfile: spectacleapp 
+
+kubectl apply -f ~/app-armor-pod.yaml
+
+# Verify
+kubectl describe pod -n spectacle apparmor-pod | grep AppArmor

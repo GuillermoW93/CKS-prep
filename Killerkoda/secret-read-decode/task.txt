@@ -1,0 +1,7 @@
+Get the Secrets of type Opaque that have been created in Namespace one .
+Create a new file called /opt/ks/one and store the base64-decoded values in that file. Each value needs to be stored on a new line.
+
+---------
+
+Get the Secrets of type Opaque that have been created in Namespace two .
+Create a new file called /opt/ks/two and store the base64-decoded values in that file. Each value needs to be stored on a new line.

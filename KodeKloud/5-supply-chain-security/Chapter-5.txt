@@ -1,0 +1,84 @@
+5.) Supply Chain Security
+
+Early detection of vulnerability
+Better resource mgt.
+Improved compliance
+Efficient incident response
+Enhanced security posture
+
+SBOM
+Software Bill of Material
+Software Components
+Supplier Details
+Software Composition
+Security Vulnerabilities
+
+SBOM - Benefits
+Transparency
+Incident Response
+Dependency management
+Security
+Compliance
+
+Minimizing Base Image Footprint
+Store data in caching like Redis
+Start from minimal image
+Distroless Docker images
+
+SBOM Format
+SPDX (Sharing SBOM)
+CycloneDX (Security/compliance)
+
+SBOM Workflow
+Generate SBOM
+Store SBOM
+Scan SBOM
+Analyze Results
+Remediate Issues
+Monitor
+
+Generate SBOM of an image
+“bom generate —image <image:tag> —output sbom.spdx.json”
+
+Install SBOM
+“curl -sSfL https://raw.githubusercontent.com/kubernetes-sigs/bom/main/install.sh | sudo bash”
+
+Syft == SBOM
+syft scan docker.io/kodekloud/webapp-color:latest -o spdx > /root/webapp-spdx.json
+syft docker.io/kodekloud/webapp-color:latest -o cyclonedx-json > /root/webapp-sbom.json
+
+Grype scans SBOM
+grype sbom:/root/webapp-sbom.json -o json > /root/grype-report.json
+
+Kubelinter
+Recommend probes
+Flags single replica deployment
+Recommends adding Security Contetx
+Enforce non-latest image tages
+Recommend Resource Quotas/Limits
+
+Checks configuratie, analysis/linting and reporting
+
+“kube-linter lint .”
+
+curl -LO https://github.com/stackrox/kube-linter/releases/latest/download/kube-linter-linux.tar.gz
+
+Whitelist Allowed Registries
+ImagePolicyWebhook
+
+Kubesec
+Static analysis of user workload
+kubesec scan <yaml>
+kubesec.io
+
+wget https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz 
+
+tar -xvf kubesec_linux_amd64.tar.gz 
+mv kubesec /usr/bin/
+
+Scanning Images for Known Vulnerabilities 
+Trivy image —severity x <image:tag>
+
+trivy image --format json --output /root/alpine.json --input /root/alpine.tar
+
+

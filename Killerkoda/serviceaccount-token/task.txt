@@ -1,0 +1,15 @@
+Control the mounting of ServiceAccount tokens in pods
+
+Modify the the config file /opt/ks/pod-one.yaml to disable the mounting of the ServiceAccount token into that Pod.
+
+Apply the modified file /opt/ks/pod-one.yaml to Namespace one .
+
+Verify that the ServiceAccount token hasn't been mounted into the Pod.
+
+------
+
+Modify the default ServiceAccount in Namespace two to prevent any Pod that uses it from mounting its token by default.
+
+Apply the Pod configuration file /opt/ks/pod-two.yaml to Namespace two .
+
+Verify that the ServiceAccount token hasn't been mounted into the Pod.

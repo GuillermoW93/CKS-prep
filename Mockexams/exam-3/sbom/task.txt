@@ -1,0 +1,12 @@
+Scenario 3: Supply Chain Security (SBOM)
+
+Topic: BOM Generate SPDX
+Context: You need to generate a Software Bill of Materials for a specific image to check for vulnerabilities.
+
+The Task:
+
+Use the trivy or syft tool (whichever is available, usually trivy in recent exams) to generate an SBOM.
+
+Generate an SBOM for the image nginx:1.19 in SPDX format.
+
+Save the output to /opt/sbom.spdx.

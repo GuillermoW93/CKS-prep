@@ -1,0 +1,20 @@
+Reference: https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/
+
+Here we are first creating a CSR and then we'll sign this using the K8s Api.
+
+The idea here is to create a new "user" that can communicate with K8s.
+
+For this now:
+
+Create a new KEY at /root/60099.key for user named 60099@internal.users
+Create a CSR at /root/60099.csr for the KEY
+
+-----
+
+Create a K8s CertificateSigningRequest resource named 60099@internal.users and which sends the /root/60099.csr to the API.
+
+Let the K8s API sign the CertificateSigningRequest.
+
+Download the CRT file to /root/60099.crt .
+
+Create a new context for kubectl named 60099@internal.users which uses this CRT to connect to K8s.

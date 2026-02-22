@@ -1,0 +1,46 @@
+# Create a policy directory and file
+
+sudo mkdir -p /etc/kubernetes/audit
+sudo nano /etc/kubernetes/audit/policy.yaml
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+rules:
+- level: Metadata
+  resources:
+  - group: ""
+    resources: ["pods", "services", "configmaps", "secrets"]
+- level: Request
+  verbs: ["create", "update", "patch", "delete"]
+
+# Backup the kube-apiserver manifest just-in-case
+
+sudo cp /etc/kubernetes/manifests/kube-apiserver.yaml \
+  /etc/kubernetes/manifests/kube-apiserver.yaml.bak
+
+# Edit the kube-apiserver manifest
+
+- --audit-policy-file=/etc/kubernetes/audit/policy.yaml
+- --audit-log-path=/etc/kubernetes/audit/logs/audit.log
+- --audit-log-maxsize=500
+- --audit-log-maxbackup=5
+- --audit-log-maxage=7
+
+volumes:
+- name: audit
+  hostPath:
+    path: /etc/kubernetes/audit
+    type: DirectoryOrCreate
+
+volumes:
+- name: audit
+  hostPath:
+    path: /etc/kubernetes/audit
+    type: DirectoryOrCreate
+
+# Verify audit logging is active
+
+sudo ls -l /etc/kubernetes/audit/logs
+sudo tail -n 5 /etc/kubernetes/audit/logs/audit.log
+
+

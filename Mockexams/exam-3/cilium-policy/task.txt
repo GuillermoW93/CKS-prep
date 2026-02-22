@@ -1,0 +1,29 @@
+In this lab, you will learn how to use Cilium to implement network security in Kubernetes by configuring pod-to-pod encryption.
+
+You will:
+
+Install and configure Cilium with encryption enabled.
+Deploy an NGINX pod and a client pod.
+Apply network policies using Cilium to allow secure communication between the pods.
+Verify that communication between the pods is encrypted.
+
+-----------------
+
+Deploy an NGINX pod labeled app: nginx that will serve as the application to test encrypted traffic.
+
+image: nginx
+replicas: 1
+port: 80
+Create a service named nginx to expose the NGINX deployment.
+
+port: 80
+targetPort: 80
+Deploy a client pod named curlpod that will act as a client to test connectivity to the NGINX pod.
+
+image: rapidfort/curl
+command: sleep 3600
+label: app: curlpod
+
+------------------
+
+Verify connectivity between pods

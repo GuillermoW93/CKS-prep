@@ -1,0 +1,207 @@
+2.) Cluster Setup and Hardening
+
+What are CIS Benchmarks?
+Center for Internet Security
+CIS-CAT Lite (runs and give report)
+
+What is Kube-bench?
+It’s from Aqua security (automated assessments as per best-practices)
+Can run either:
+Deploy as a Docker Container;
+Deploy as a Pod in a Kubernetes cluster;
+Install the kube-bench binary
+Compile from source
+
+curl -L https://github.com/aquasecurity/kube-bench/releases/download/v0.12.0/kube-bench_0.12.0_linux_amd64.deb -o kube-bench_0.12.0_linux_amd64.deb
+sudo dpkg -i kube-bench_0.12.0_linux_amd64.deb
+kube-bench version
+
+Run specific point again: kube-bench --check=“1.3.1"
+kube-bench run --targets="master,etcd”
+
+Kubernetes Security Primitives
+Secure Hosts
+Password based authentication disabled
+SSH key based authenticatiokmn
+Authenticate
+RBAC
+Static Token File (not recommended)
+curl -v -k https://master-node-ip:6443/api/v1/pods —header “Authentication: Bearer X” 
+Certificates
+Identity Services (Kerberos, LDAP, etc)
+
+
+Service Accounts
+If you assign a service account to pod, it mounts the token inside the pod
+/var/run/secrets
+Add ‘automountServiceAccountToken: false’ to not add tokens by default
+
+Decode the token using -d base64
+curl https://192.168.56.70:6443/api -insecure —header “Authentication: Bearer” (use the decrypted token to login)
+
+Every namespace has a default serviceaccount
+default serviceaccount is mounted when pod is created
+
+
+TLS in Kubernetes
+
+Generate certificate 
+“openssl genrsa -out ca.key 2048”
+
+Certificate Signing Request
+“openssl req -new -key ca.key -subj “/CN=KUBERNETES-CA” -out ca.csr”
+
+Sign Certificactes
+“openssl x509 -req -in ca.csr -signkey ca.key -out ca.crt”
+
+View details of certificate
+“openssl x509 -in /etc/kubernetes/pki/apiserver.crt -text -noout”
+
+crictl ps -a 
+crictl logs <id> 
+
+Securing KubeConfig File
+$HOME/.kube/config
+Map cluster, context and users together
+‘kubectl config view’ (view the KubeConfig file)
+‘Kubectl config use-context <contexts> (sets contexts)’
+kubectl config current-context --kubeconfig my-kube-config
+kubectl config --kubeconfig=/root/my-kube-config use-context research
+
+By adding ~/.bashrc , export KUBECONFIG=/root/<file>, source ~/.bashrc you make it default
+
+API Groups
+/metrics, /healthz are used to monitor health of cluster
+/version used to view the version of the cluster
+/api (core) - namespaces, pods, pvc etc. etc.
+/apis (named group) - apps, networking, extensions, certificates
+/logs integrate with 3rd party logging applications
+
+Start the Kube-proxy on different port
+kubectl proxy --port=8090 & 
+
+Test connectivity
+curl http://localhost:8090/api/
+
+ABAC Policy
+JSON-in-Line config
+
+cat <<EOF > /etc/kubernetes/abac/abac-policy.jsonl {"apiVersion": "abac.authorization.kubernetes.io/v1beta1", "kind": "Policy", "spec": {"user": "system:serviceaccount:default:john", "namespace": "default", "resource": "pods", "apiGroup": "*" , "readonly": true}} EOF
+
+Retrieve ServiceAccount token (decoded Base64)
+kubectl get secret john-secret -o jsonpath='{.data.token}' | base64 —decode
+
+export SA_TOKEN=$(cat john-secret.txt)
+kubectl config set-credentials john --token=$SA_TOKEN
+kubectl config set-context john-context --cluster=kubernetes --namespace=default --user=john
+kubectl config use-context john-context
+
+By editting the /etc/kubernetes/manifests/kube-apiserver.yaml it restarts
+sudo systemctl status kubelet
+
+Kubelet Security
+Verify the kubelet configfile
+‘ps -aux | grep kubelet’
+Cat /var/lib/kubelet/config.yaml
+
+10250 - Serves api that allows full access 
+10255 - serves apiece that allows unauthenticated read-only access
+Disable by setting —anonymous-auth=false in kubelet file
+
+curl -sk https://localhost:10250/pods/
+
+Kubelet makes request to kube-apiserver if it’s allowed/or not
+
+curl -sk https://localhost:10255/metrics 
+Disabled by default 
+read-only-port=0
+
+systemctl restart kubelet.service
+
+Kubectl proxy
+Curl http://<kube-api-server>:6443 -k 
+
+Launch kubectl proxy on different port 
+Curl http://localhost:<port> -k  
+This will be forwarded to kube-apiserver
+
+Note: runs on your computer/only accessible from your pc!
+
+curl -k https://localhost:6443 --key /etc/kubernetes/pki/apiserver-kubelet-client.key --cert /etc/kubernetes/pki/apiserver-kubelet-client.crt
+
+curl 127.0.0.1:8001/version > /root/kube-proxy-version.json
+
+Kubernetes Dashboard
+Authentication (token or Kubeconfig file)
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+
+To get token of the service account: 
+kubectl get secrets -n kubernetes-dashboard admin-user -o go-template="{{.data.token | base64decode}}”
+
+Cluster Upgrade Process
+
+Kubeadm upgrade plan
+apt-get upgrade -y kubeadm=<version>
+kubeadm upgrade apply
+Next, upgrade Kubelet 
+apt-get upgrade -y kubelet=<version>
+systemctl restart kubelet
+verify -> ‘kubectl get nodes’
+
+Upgrade worker nodes
+kubectl drain <node>
+apt-get upgrade -y kubeadm=<version>
+apt-get upgrade -y kubelet=<version>
+kubeadm upgrade node config —kubelet-version <version>
+systemctl restart kubelet
+kubectl uncordon <node>
+
+Network Policy
+Kube-router, Calico, WeaveNet, Romana
+
+Flannel does NOT support network policies
+
+Docker Service Configuration
+systemctl start / stop docker
+dockerd (debugging/troubleshooting purposes)
+dockerd —debug
+Dockerd —debug —host=tcp://192.168.1.10:2375 (daemon accesible outside)
+export DOCKER_HOST=“tcp://192.168.1.10:2375”
+Allows anyone to run containers
+Prevent by adding —tlscert / —tlskey (2375 unencrypted port / 2376 encrypted port)
+Add this to ‘/etc/docker/daemon.json’ to make it run with dockerd
+
+Docker Securing the Daemon
+Disable password-based authentication
+Enable SSH key-based authentication
+Determine users who needs access to server
+Use TLS
+
+Securing Node Metadata in Kubernetes
+You can delete/taint nodes/get IP-addresses
+
+Prevent by:
+RBAC
+
+Auditing
+Who
+When
+What
+How
+
+Audit Policy
+None;
+Metadata;
+Request;
+RequestResponse
+
+
+
+
+
+
+
+
+
+

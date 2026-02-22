@@ -1,0 +1,37 @@
+k run test --image=nginx:alpine
+k exec -it pod/test --sh
+
+cat /var/log/syslog | grep 'falco'
+
+2026-02-11T15:23:28.722260+00:00 controlplane falco: 15:23:28.714338904: Notice A shell was spawned in a container with an attached terminal | evt_type=execve user=root user_uid=0 user_loginuid=-1 process=sh proc_exepath=/bin/busybox parent=runc command=sh terminal=34816 exe_flags=EXE_WRITABLE|EXE_LOWER_LAYER container_id=98d3bbb0bee1 container_name=test container_image_repository=docker.io/library/nginx container_image_tag=alpine k8s_pod_name=test k8s_ns_name=default
+
+--------
+
+Add the following to '/etc/falco/falco_rules.local.yaml'
+
+- rule: Terminal shell in container
+  desc: >
+    A shell was used as the entrypoint/exec point into a container with an attached terminal. Parent process may have
+    legitimately already exited and be null (read container_entrypoint macro). Common when using "kubectl exec" in Kubernetes.
+    Correlate with k8saudit exec logs if possible to find user or serviceaccount token used (fuzzy correlation by namespace and pod name).
+    Rather than considering it a standalone rule, it may be best used as generic auditing rule while examining other triggered
+    rules in this container/tty.
+  condition: >
+    spawned_process
+    and container
+    and shell_procs
+    and proc.tty != 0
+    and container_entrypoint
+    and not user_expected_terminal_shell_in_container_conditions
+  output: NEW SHELL!!! A shell was spawned in a container with an attached terminal | evt_type=%evt.type user=%user.name user_uid=%user.uid user_loginuid=%user.loginuid process=%proc.name proc_exepath=%proc.exepath parent=%proc.pname command=%proc.cmdline terminal=%proc.tty exe_flags=%evt.arg.flags user_id=%user.uid repo=%container.image.repository
+  priority: NOTICE
+  tags: [maturity_stable, container, shell, mitre_execution, T1059]
+
+Reload falco
+- systemctl restart falco
+
+controlplane:/etc/falco$ k exec -it pod/test -- sh
+/ # exit
+
+controlplane:/etc/falco$ cat /var/log/syslog | grep -a falco | grep shell
+2026-02-11T15:33:35.616244+00:00 controlplane falco: 15:33:35.611815509: Notice NEW SHELL!!! A shell was spawned in a container with an attached terminal | evt_type=execve user=root user_uid=0 user_loginuid=-1 process=sh proc_exepath=/bin/busybox parent=containerd-shim command=sh terminal=34817 exe_flags=EXE_WRITABLE|EXE_LOWER_LAYER user_id=0 repo=docker.io/library/nginx container_id=98d3bbb0bee1 container_name=test container_image_repository=docker.io/library/nginx container_image_tag=alpine k8s_pod_name=test k8s_ns_name=default

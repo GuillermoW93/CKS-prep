@@ -1,0 +1,5 @@
+Using trivy :
+
+Scan images in Namespaces applications and infra for the vulnerabilities CVE-2021-28831 and CVE-2016-9841 .
+
+Scale those Deployments containing any of these down to 0 .

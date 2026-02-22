@@ -1,0 +1,35 @@
+https://kubernetes.io/docs/tasks/debug/debug-cluster/audit/
+
+Add the following to /etc/kubernetes/manifests/kube-apiserver.yaml
+ 17     - --audit-policy-file=/etc/kubernetes/audit-policy/policy.yaml
+ 18     - --audit-log-path=/etc/kubernetes/audit-logs/audit.log
+ 19     - --audit-log-maxbackup=2
+ 20     - --audit-log-maxsize=7
+
+Add the following to:
+101     - mountPath: /etc/kubernetes/audit-policy/policy.yaml
+102       name: audit-policy 
+103       readOnly: true
+104     - mountPath: /etc/kubernetes/audit-logs/
+105       name: audit-logs
+106       readOnly: false
+
+   - hostPath:
+135       path: /etc/kubernetes/audit-policy/policy.yaml
+136       type: File
+137     name: audit-policy
+138  - hostPath:
+139       path: /etc/kubernetes/audit-logs
+140       type: DirectoryOrCreate
+141     name: audit-logs
+
+
+stat /etc/kubernetes/audit-logs/audit.log 
+  File: /etc/kubernetes/audit-logs/audit.log
+  Size: 94432           Blocks: 192        IO Block: 4096   regular file
+Device: 253,1   Inode: 1350553     Links: 1
+Access: (0600/-rw-------)  Uid: (    0/    root)   Gid: (    0/    root)
+Access: 2026-02-11 10:31:19.539676266 +0000
+Modify: 2026-02-11 10:31:24.342729203 +0000
+Change: 2026-02-11 10:31:24.342729203 +0000
+ Birth: 2026-02-11 10:31:19.539676266 +0000

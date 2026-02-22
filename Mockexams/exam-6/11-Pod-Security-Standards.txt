@@ -1,0 +1,16 @@
+# Create namespace
+
+k create ns test
+
+# Label the namespace for PSS
+
+k label ns test --label=pod-security.kubernetes.io/enforce=restricted
+
+# Running a root pod should FAIL
+- k run test-pod -image=nginx --command sleep 1h
+
+# Fix all to make it run
+- Add securityContext: capabilities
+- Add privilegescalation: false
+
+You'll see what to implement in the error log when trying to apply a pod that does not meet the requirements of PSS.

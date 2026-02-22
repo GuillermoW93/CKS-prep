@@ -1,0 +1,28 @@
+# install BOM
+curl -L https://github.com/kubernetes-sigs/bom/releases/download/v0.6.0/bom_v0.6.0_linux_amd64 -o bom
+
+# or raspberry pi ARM64
+curl -L https://github.com/kubernetes-sigs/bom/releases/download/v0.6.0/bom-arm64-linux -o bom
+
+# make it executable
+chmod +x bom
+
+# move to path
+sudo mv /usr/local/bin/bom
+
+# verify bom
+bom version
+
+-------
+
+bom generate --image-archive apple-image.tar --format json --output example.spdx
+INFO bom v0.6.0: Generating SPDX Bill of Materials 
+INFO Processing image archive apple-image.tar     
+INFO Package describes image alpine:latest        
+INFO Image manifest lists 1 layers                
+INFO etc/os-release is a symlink, following to usr/lib/os-release 
+INFO Scan of container image returned 16 OS packages in layer #0 
+WARN Document has no name defined, automatically set to SBOM-SPDX-462fa368-21f9-4f3a-af3c-2fb30d571247 
+INFO Package SPDXRef-Package-alpine-latest has 1 relationships defined 
+INFO Package SPDXRef-Package-alpine-latest-sha256-d8ad8cd72600f46cc068e16c39046ebc76526e41051f43a8c249884b200936c0 has 16 relationships defined 
+root@k3s:~/CKS/exam-questions/sbom# vi example.spdx 

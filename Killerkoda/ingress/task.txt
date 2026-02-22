@@ -1,0 +1,19 @@
+Reference: https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+There are two existing Deployments in Namespace world which should be made accessible via an Ingress.
+
+First: create ClusterIP Services for both Deployments for port 80 . The Services should have the same name as the Deployments.
+
+------
+
+The Nginx Ingress Controller has been installed.
+
+Create a new Ingress resource called world for domain name world.universe.mine . The domain points to the K8s Node IP via /etc/hosts .
+
+The Ingress resource should have two routes pointing to the existing Services:
+
+http://world.universe.mine:30080/europe/
+
+and
+
+http://world.universe.mine:30080/asia/

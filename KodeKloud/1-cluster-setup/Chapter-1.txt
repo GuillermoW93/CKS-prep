@@ -1,0 +1,10 @@
+1.) Understanding the Kubernetes Attack Surface - The 4C's
+
+Cloud
+Datacenter, Network, Servers
+Cluster
+Authentication, Authorization, Admission, Network Policy
+Container
+Restrict Images, Supply Chain, Sandboxing, Privileged
+Code
+Code Security Best Practices 

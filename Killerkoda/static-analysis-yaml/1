@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod
+spec:
+  containers:
+  - name: main
+    image: alpine
+    command: ["/bin/sleep", "999999"]
+    securityContext:
+      readOnlyRootFilesystem: true
+  dnsPolicy: ClusterFirst
+  restartPolicy: AlwaysapiVersion: v1
+
+kind: Pod
+metadata:
+  name: pod
+spec:
+  containers:
+  - name: main
+    image: alpine
+    command: ["/bin/sleep", "999999"]
+    livenessProbe:
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+
+Enforcing a read-only root filesystem can make containers more secure.
+
+mv /root/apps/app1-510d6362.yaml /root/insecure
+
+-------
+
+

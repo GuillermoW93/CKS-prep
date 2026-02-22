@@ -1,0 +1,44 @@
+k get ingress -n world
+NAME    CLASS   HOSTS                 ADDRESS   PORTS   AGE
+world   nginx   world.universe.mine             80      83s
+
+controlplane:~$ k get ingress -n world -o yaml > ingress.yaml
+
+controlplane:~$ ls
+cert.crt  cert.key  filesystem  ingress.yaml
+
+controlplane:~$ pwd
+/root
+
+controlplane:~$ k -n world create secret tls ingresstls --cert=/root/cert.crt --key=/root/cert.key
+
+k edit ingresses.networking.k8s.io -n world
+ingress.networking.k8s.io/world edited
+
+spec:
+  ingressClassName: nginx
+  tls:                            # add
+  - hosts:                        # add
+    - world.universe.mine         # add
+    secretName: ingresstls       # add
+  rules:
+  - host: "world.universe.mine"
+    http:
+      paths:
+      - path: /europe
+        pathType: Prefix
+        backend:
+          service:
+            name: europe
+            port:
+              number: 80
+      - path: /asia
+        pathType: Prefix
+        backend:
+          service:
+            name: asia
+            port:
+
+Verify it's working:
+curl -m1 -kvI https://world.universe.mine:30443/europe 2>&1 | grep subject | grep world.universe.mine
+*  subject: CN=world.universe.mine; O=world.universe.mine

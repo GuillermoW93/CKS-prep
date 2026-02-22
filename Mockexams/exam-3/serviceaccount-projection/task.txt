@@ -1,0 +1,7 @@
+For this question you must insert a serviceaccount token via a secret and mount it to projected volume (with expiry date).
+
+Reference: 
+
+A projected volume allows you to map several existing volume sources into the same directory, for example a serviceAccountToken.
+
+

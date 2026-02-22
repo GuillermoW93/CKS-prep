@@ -1,0 +1,15 @@
+Create a Pod named prime image nginx:alpine .
+
+The container should run as privileged .
+
+Install iptables (apk add iptables ) inside the Pod.
+
+Test the capabilities using iptables -L .
+
+----
+
+There is an existing StatefulSet yaml at /application/sts.yaml .
+
+It should run as privileged but it seems like it cannot be applied.
+
+Fix it and create the StatefulSet.

@@ -1,0 +1,13 @@
+Run two Docker containers app1 and app2 with the following attributes:
+
+they should run image nginx:alpine
+
+they should share the same PID kernel namespace
+
+they should run command sleep infinity
+
+they should run in the background (detached)
+
+Then check which container sees which processes and make sense of why.
+
+

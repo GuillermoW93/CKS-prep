@@ -1,0 +1,22 @@
+Scenario 1: Runtime Security with Falco
+
+Topic: Falco Rule for /dev/mem
+Context: You need to detect if any pod tries to access the sensitive /dev/mem device.
+
+Setup (Prerequisites):
+
+Assume Falco is installed (standard for CKS).
+
+If not, install it or just practice the configuration file editing.
+
+The Task:
+
+Update the falco_rules.local.yaml file to include a rule named Detect dev mem access.
+
+The rule should check if fd.name is /dev/mem.
+
+The output should be: "Sensitive file opened (user=%user.name command=%proc.cmdline file=%fd.name)".
+
+Priority should be WARNING.
+
+Trigger the rule by spawning a pod that attempts to read /dev/mem.

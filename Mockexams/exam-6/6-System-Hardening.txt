@@ -1,0 +1,14 @@
+# Question 
+
+Service is running on port 389 inside the system, find the process-id of the process, and stores the
+names of all the open-files inside the /candidate/KH77539/files.txt, and also delete the binary.
+
+# Solution
+
+netstat -tulpn | grep :389
+
+lsof -p 1234  > /candidate/KH77539/files.txt
+
+ls -l /proc/1234/exe
+
+rm /path/to/exe

@@ -1,0 +1,89 @@
+Reference: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+
+
+k get pods -n app
+NAME              READY   STATUS    RESTARTS   AGE
+app1-0            1/1     Running   0          29s
+microservice1-0   1/1     Running   0          29s
+
+controlplane:~$ k get pods -n app --show-labels
+NAME              READY   STATUS    RESTARTS   AGE   LABELS
+app1-0            1/1     Running   0          37s   app=app1,apps.kubernetes.io/pod-index=0,controller-revision-hash=app1-76d4566b4f,statefulset.kubernetes.io/pod-name=app1-0
+microservice1-0   1/1     Running   0          37s   app=microservice1,apps.kubernetes.io/pod-index=0,controller-revision-hash=microservice1-5779ddc59c,statefulset.kubernetes.io/pod-name=microservice1-0
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-out
+  namespace: app
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP
+
+k apply -f netpol.yaml 
+networkpolicy.networking.k8s.io/deny-out created
+
+controlplane:~$ k -n app exec app1-0 -- curl www.google.com
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:21 --:--:--     ^C
+
+controlplane:~$ k -n app exec microservice1-0 -- curl www.google.com
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0^C
+
+controlplane:~$ k -n app exec app1-0 -- nslookup www.google.com
+Server:         10.96.0.10
+Address:        10.96.0.10:53
+
+Name:   www.google.com
+Address: 2a00:1450:4001:807::2004
+
+Name:   www.google.com
+Address: 142.251.154.119
+Name:   www.google.com
+Address: 142.251.151.119
+Name:   www.google.com
+Address: 142.251.150.119
+Name:   www.google.com
+Address: 142.251.153.119
+Name:   www.google.com
+Address: 142.251.155.119
+Name:   www.google.com
+Address: 142.251.156.119
+Name:   www.google.com
+Address: 142.251.157.119
+Name:   www.google.com
+Address: 142.251.152.119
+
+controlplane:~$ k -n app exec microservice1-0 -- nslookup www.google.com
+Server:         10.96.0.10
+Address:        10.96.0.10:53
+
+Name:   www.google.com
+Address: 2a00:1450:4001:807::2004
+
+Name:   www.google.com
+Address: 142.251.151.119
+Name:   www.google.com
+Address: 142.251.155.119
+Name:   www.google.com
+Address: 142.251.154.119
+Name:   www.google.com
+Address: 142.251.152.119
+Name:   www.google.com
+Address: 142.251.156.119
+Name:   www.google.com
+Address: 142.251.157.119
+Name:   www.google.com
+Address: 142.251.153.119
+Name:   www.google.com
+Address: 142.251.150.119

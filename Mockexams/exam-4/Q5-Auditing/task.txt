@@ -1,0 +1,1 @@
+Create a policy that logs Metadata for all Secrets.

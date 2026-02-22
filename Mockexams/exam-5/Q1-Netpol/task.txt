@@ -1,0 +1,1 @@
+# Create a NetworkPolicy that restricts access to backend pods and controls their egress

@@ -1,0 +1,35 @@
+Copy the audit-policy.yaml to /etc/kubernetes/audit-policy.yaml
+
+Next, 'vi /etc/kubernetes/manifests/kube-apiserver.yaml' and add:
+
+—audit-policy-file=/etc/kubernetes/audit-policy.yaml
+—audit-log-path=/var/log/audit.log
+—audit-log-maxage=1
+
+Next, (still in 'kube-apiserver.yaml') were adding the volume/volumeMount
+
+volumes:
+- name: audit
+  hostPath:
+    path: /etc/kubernetes/audit-policy.yaml
+    type: File
+
+- name: varlog
+  hostPath:
+    path: /var/log/
+    type: Directory 
+
+volumeMounts:
+  - mountPath: /etc/kubernetes/audit-policy.yaml
+    name: audit
+    readOnly: true
+  - mountPath: /var/log/
+    name: varlog
+    readOnly: false
+
+Save and exit. It may take a few minutes for kube-apiserver to 'load'. 
+
+Verify:
+
+crictl ps | grep apiserver
+ls -l /var/log/audit.log

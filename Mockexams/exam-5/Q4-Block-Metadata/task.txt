@@ -1,0 +1,1 @@
+# Create a NetworkPolicy to block metadata access (169.254.169.254/32)

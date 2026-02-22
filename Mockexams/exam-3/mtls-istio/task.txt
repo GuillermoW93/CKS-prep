@@ -1,0 +1,21 @@
+Deploy: https://raw.githubusercontent.com/istio/istio/refs/heads/master/samples/helloworld/helloworld.yaml
+
+Enabling Istio Injection into the test namespace would result in the services communicating via mTLS. However, let’s enforce this so that no matter what, mTLS would always be used.
+
+Create and apply a global PeerAuthentication policy to enforce STRICT mTLS mode.
+
+----------
+
+Verify that the helloworld endpoint is now inaccessible from the test pod due to mTLS enforcement. To do so, run:
+
+kubectl exec -ti -n test test -- curl --head http://helloworld.default.svc:5000/hello
+
+You should see a connection error.
+
+root@controlplane ~ ➜  kubectl exec -ti -n test test -- curl --head http://helloworld.default.svc:5000/hello
+curl: (56) Recv failure: Connection reset by peer
+command terminated with exit code 56
+
+IMPORTANT: This is happening because Istio Injection is not enabled on the test namespace, so traffic from the test pod to the helloworld endpoint is going over plaintext. But the PeerAuthentication policy is enforcing that all traffic must be mTLS encrypted.
+
+----------

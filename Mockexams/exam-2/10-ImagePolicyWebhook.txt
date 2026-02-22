@@ -1,0 +1,50 @@
+# Question
+
+We are required to deploy an ImagePolicyWebhook admission controller to secure the deployments that are made on our cluster by ensuring the below:
+
+Update and fix the issue on the /etc/kubernetes/pki/admission_configuration.yaml which will be used by ImagePolicyWebhook
+Ensure that the policy is set to implicit deny.
+Ensure the plugin is on the kube-api server
+
+# Solution
+
+Reference: https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/
+
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+- name: ImagePolicyWebhook
+  configuration:
+    imagePolicy:
+      kubeConfigFile: /etc/kubernetes/pki/admission_kube_config.yaml ## ensure you apply the correct path
+      allowTTL: 50
+      denyTTL: 50
+      retryBackoff: 500
+      defaultAllow: false ## ensure this is set to false
+
+Edit the kube-apiserver.yaml (/etc/kubernetes/manifests/kube-apiserver.yaml)
+
+- --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook ## add ImagePolicyWebhook here
+- --admission-control-config-file=/etc/kubernetes/pki/admission_configuration.yaml ## ensure correct config file path is used
+
+Add volume/volumeMount
+
+volumeMounts:
+    - mountPath: /etc/kubernetes/pki/admission_configuration.yaml
+      name: admission-config
+      readOnly: true
+    - mountPath: /etc/kubernetes/pki/admission_kube_config.yaml
+      name: admission-kube-config
+      readOnly: true
+
+volumes:
+  - hostPath:
+      path: /etc/kubernetes/pki/admission_configuration.yaml
+      type: File
+    name: admission-config
+  - hostPath:
+      path: /etc/kubernetes/pki/admission_kube_config.yaml
+      type: File
+    name: admission-kube-config
+
+Let the kube-apiserver rebuild (watch crictl ps / journalctl -fu apiserver)

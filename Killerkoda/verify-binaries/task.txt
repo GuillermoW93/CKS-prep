@@ -1,0 +1,10 @@
+Check the kubelet binary hash
+
+Download the kubelet binary in the same version as the installed one.
+
+wget https://dl.k8s.io/vX.Y.Z/kubernetes-server-linux-amd64.tar.gz
+Compare their sha hashes and answer with:
+
+echo SAME > /answer
+echo DIFFERENT > /answer
+

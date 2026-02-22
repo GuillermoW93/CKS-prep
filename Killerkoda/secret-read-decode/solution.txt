@@ -1,0 +1,16 @@
+Reference: https://kubernetes.io/docs/concepts/configuration/secret/#using-secrets-as-environment-variables
+
+kubectl get secret s1 -n one -o jsonpath='{.data.*}' | base64 -d
+controlplane:~$ kubectl get secret s2 -n one -o jsonpath='{.data.*}' | base64 -d
+admincontrolplane:~$ 
+
+vi /opt/ks/one
+secret
+admin
+
+---------
+
+controlplane:~$ kubectl -n two get secret s3 -ojsonpath="{.data.data}" | base64 -d
+newsecretcontrolplane:~$ vi /opt/ks/two
+controlplane:~$ cat /opt/ks/two
+newsecret

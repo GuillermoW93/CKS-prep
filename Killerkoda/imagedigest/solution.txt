@@ -1,0 +1,28 @@
+Simply run:
+- "k run 'name-pod' --image=nginx@digest"
+
+k run crazy-pod --image=nginx@sha256:eb05700fe7baa6890b74278e39b66b2ed1326831f9ec3ed4bdc6361a4ac2f333
+
+----
+
+k get pod/crazy-deployment-697d5f6d46-rq6fj -o yaml | grep -A1 -B2 image
+spec:
+  containers:
+  - image: httpd:2.4.52-alpine
+    imagePullPolicy: IfNotPresent
+    name: httpd
+--
+  containerStatuses:
+  - containerID: containerd://52eafac32ab0129476103e0c2fdbff7d29068762282290a76f9fcc65db538d33
+    image: docker.io/library/httpd:2.4.52-alpine
+    imageID: docker.io/library/httpd@sha256:c7b8040505e2e63eafc82d37148b687ff488bf6d25fc24c8bf01d71f5b457531
+    lastState: {}
+
+
+The digest is in the 'imageID' field.
+
+Next, run:
+- 'k edit deployment/crazy-deployment' and edit the spec.containers.image:
+spec:
+      containers:
+      - image: httpd@sha256:c7b8040505e2e63eafc82d37148b687ff488bf6d25fc24c8bf01d71f5b457531

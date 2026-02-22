@@ -1,0 +1,25 @@
+policy.yaml
+
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+spec:
+  mtls:
+    mode: STRICT
+
+-----------
+
+k label namespace test istio-injection=enabled
+namespace/test labeled
+
+kubectl exec -ti -n test test -- curl --head http://helloworld.default.svc:5000/hello
+HTTP/1.1 200 OK
+server: envoy
+date: Fri, 13 Feb 2026 21:35:09 GMT
+content-type: text/html; charset=utf-8
+content-length: 60
+x-envoy-upstream-service-time: 84
+
+https://istio.io/latest/docs/setup/additional-setup/sidecar-injection/

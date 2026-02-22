@@ -1,0 +1,28 @@
+First run 'aa-status' to verif AppArmor has profiles/runs
+
+Next, on node01 (ssh node01) run:
+node01:~$ aa-status | grep tcpdump
+   tcpdump
+node01:~$ aa-status | grep ftpd   
+node01:~$ aa-status | grep snap.lxd.lxc
+node01:~$ aa-status | grep docker-default
+   docker-default
+
+This concludes we need to create a file /root/profiles.txt on controlplane with:
+- tcpdump/docker-default
+
+-------
+
+k get deployment -n moon
+NAME       READY   UP-TO-DATE   AVAILABLE   AGE
+spacecow   0/3     3            0           11m
+
+Edit the deployment and add the following under spec.template.spec:
+      securityContext:
+        appArmorProfile:
+          type: Localhost
+          localhostProfile: docker-default
+
+https://kubernetes.io/docs/tutorials/security/apparmor
+
+journalctl -k | grep DENIED

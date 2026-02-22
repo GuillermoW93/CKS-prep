@@ -1,0 +1,1 @@
+# Create a pod to verify Kubernetes binaries

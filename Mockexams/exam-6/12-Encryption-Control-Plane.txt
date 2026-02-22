@@ -1,0 +1,19 @@
+# Enable TLS on Kubernetes Control Plane
+
+vi /etc/kubernetes/manifests/kube-apiserver.yaml
+
+## Add the following under spec:
+- --tls-min-version=VersionTLS13
+- --tls-cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+## Edit the etcd static pod (etc/kubernetes/manifests/etcd.yaml)
+- --cipher-suites=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+
+## Watch pods to get back online
+watch crictl ps
+
+## Verify
+
+crictl logs <kube-api> 
+
+

@@ -1,0 +1,12 @@
+Create a Pod with ServiceAccount that uses Secrets
+
+Create new Namespace ns-secure and perform everything following in there
+Create ServiceAccount secret-manager
+Create Secret sec-a1 with any literal content of your choice
+Create Secret sec-a2 with any file content of your choice (like /etc/hosts )
+
+In Namespace ns-secure create Pod secret-manager with image httpd:alpine which uses the new ServiceAccount
+Make Secret sec-a1 available as environment variable SEC_A1
+Mount Secret sec-a2 into the Pod read-only under /etc/sec-a2
+Verify your solution worked
+

@@ -1,0 +1,1 @@
+In case you do not have a homelab or want an environmen with 'more' time, please use the following: https://killercoda.com/killer-shell-cks

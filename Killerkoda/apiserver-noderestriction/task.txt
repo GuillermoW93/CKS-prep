@@ -1,0 +1,3 @@
+The Kubelet on node01 shouldn't be able to set Node labels starting with node-restriction.kubernetes.io/* .
+
+Verify this is not restricted atm by adding label node-restriction.kubernetes.io/one=123 from Node node01 to Node node01 .

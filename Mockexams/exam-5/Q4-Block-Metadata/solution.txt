@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: block-metadata
+  namespace: metadata-protect
+spec:
+  podSelector: {}  # Apply to all pods
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 169.254.169.254/32
+
+
+# Verify that eveything elsse is allowed except te metadata IP
+
+'k run test-pod -n metadata-protect --image=busybox --command sleep 3600'
+'k exec -it -n metadata-protect pods/test-pod -- ping 169.254.169.254'
+'k exec -it -n metadata-protect pods/test-pod -- ping 1.1.1.1'

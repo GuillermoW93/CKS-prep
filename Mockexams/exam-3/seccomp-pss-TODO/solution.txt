@@ -1,0 +1,46 @@
+PSA is enabled by default:
+- “k exec -n kube-system kube-apiserver-controlplane -it — kube-apiserver -h | grep enable-admission-plugins”
+
+
+# Enforce Baseline (Block pods that don't meet baseline)
+kubectl label --overwrite ns secure-team pod-security.kubernetes.io/enforce=baseline
+
+# Warn on Restricted (Log a warning if pods don't meet restricted)
+kubectl label --overwrite ns secure-team pod-security.kubernetes.io/warn=restricted
+
+# Verify
+kubectl get namesapce secure-team --show-labels
+
+apiVersion: apiserver.config.k8s.io/v1
+kind: AdmissionConfiguration
+plugins:
+- name: PodSecurity
+  configuration:
+    apiVersion: pod-security.admission.config.k8s.io/v1beta1
+    kind: PodSecurityConfiguration
+    defaults:
+      enforce: "baseline"
+      enforce-version: "latest"
+      warn: "restricted"       
+      warn-version: "latest"   
+    exemptions:                # <--- CRITICAL: Don't break system namespaces!
+      namespaces: ["kube-system", "istio-system"]
+
+Save this to: /etc/kubernetes/admission/pod-security.yaml
+
+Edit: /etc/kubernetes/manifests/kube-apiserver.yaml
+- --admission-control-config-file=/etc/kubernetes/admission/pod-security.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-secure
+  namespace: secure-team
+spec:
+  securityContext:
+    seccompProfile:
+      type: Localhost
+      localhostProfile: profiles/audit.json
+  containers:
+  - name: nginx
+    image: nginx

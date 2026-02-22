@@ -1,0 +1,45 @@
+controlplane:~$ k create ns ns-secure
+namespace/ns-secure created
+
+controlplane:~$ k create sa -n ns-secure secret-manager
+serviceaccount/secret-manager created
+
+k create secret generic sec-a1 -n ns-secure --from-literal=EXAM=CKS
+
+controlplane:~$ k create secret generic sec-a2 -n ns-secure --from-file=/etc/hosts
+
+------
+
+k run secret-manager -n ns-secure --image=httpd:alpine --dry-run=client -o yaml > pod.yaml
+
+  1 apiVersion: v1
+  2 kind: Pod
+  3 metadata:
+  4   labels:
+  5     run: secret-manager
+  6   name: secret-manager
+  7   namespace: ns-secure
+  8 spec:
+  9   containers:
+ 10   - image: httpd:alpine
+ 11     name: secret-manager
+ 12     resources: {}
+ 13     serviceAccountName: secret-manager
+ 14     env:
+ 15     - name: SEC_A1
+ 16       valueFrom:
+ 17         secretKeyRef:
+ 18           name: sec-a1
+ 19           key: EXAM
+ 20   
+ 21     volumeMounts:
+ 22     - name: sec-a2
+ 23       mountPath: "/etc/sec-2"
+ 24       readOnly: true
+ 25   volumes:
+ 26   - name: sec-a2
+ 27     secret:
+ 28       secretName: sec-a2
+ 29   dnsPolicy: ClusterFirst
+ 30   restartPolicy: Always
+ 31 status: {}

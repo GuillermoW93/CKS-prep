@@ -1,0 +1,27 @@
+docker run --name app1 -d nginx:alpine sleep infinity
+
+docker exec -it app1 whoami
+root
+
+controlplane:~$ docker exec -it app1 ps aux
+PID   USER     TIME  COMMAND
+    1 root      0:00 sleep infinity
+   19 root      0:00 ps aux
+
+
+docker run --name app2 --pid=container:app1 -d nginx:alpine sleep infinity
+
+docker exec app1 ps aux
+docker exec app2 ps aux
+PID   USER     TIME  COMMAND
+    1 root      0:00 sleep infinity
+   26 root      0:00 sleep infinity
+   32 root      0:00 ps aux
+PID   USER     TIME  COMMAND
+    1 root      0:00 sleep infinity
+   26 root      0:00 sleep infinity
+   38 root      0:00 ps aux
+
+Mode container:
+--pid=container:app1
+This tells Docker to target a specific container's PID namespace.

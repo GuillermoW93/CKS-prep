@@ -1,0 +1,10 @@
+Reference: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ 
+
+    spec:
+      containers:
+      - image: httpd:2.4.52-alpine
+        name: httpd
+        securityContext:
+            allowPrivilegeEscalation: false
+
+

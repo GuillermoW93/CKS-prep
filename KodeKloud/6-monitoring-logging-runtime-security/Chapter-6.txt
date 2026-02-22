@@ -1,0 +1,75 @@
+6.) Monitoring, Logging and Runtime Security
+
+Perform Behavioral Analytics of Syscall Process
+Falco sees the syscalls from the application in User Space to Kernel Space
+Does this by ‘Falco Kernel Module’ or eBPF
+
+Using Falco as Trusion Detection
+systemctl status falco
+journalctl -fu falco
+
+Falco Rules
+sysdig filters / https://falco.org/docs/rules/supported-fields/
+macro’s
+https://falco.org/docs/rules/default-macros/
+
+Falco Configuration Files
+/etc/falco/falco.yaml
+Falco uses that during startup
+Verify using journalctl -fu falco
+
+priority default is default
+everything is logged
+
+Hot reload a process
+cat /var/run/falco.pid (you get ID)
+kill -1 $(cat /var/run/falco.pid)
+
+https://falco.org/docs/getting-started/installation/
+
+https://github.com/falcosecurity/charts/tree/master/falco
+
+https://falco.org/docs/rules/supported-fields/
+
+https://falco.org/docs/rules/default-macros/
+
+https://falco.org/docs/configuration/
+
+Ensuring Immutability of Containers at  Runtime
+ Prevent by cannot write into the filesystem
+example what it means:
+kubectl cp <file> nginx:/etc/nginx
+
+SecurityContext:
+readOnlyRootFilesystem: true
+use volumes for directorys
+privileged: false
+runAsuser:
+rule: RunAsNonRoot
+
+Kubernetes Auditing
+audit-policy.yaml
+
+apiVersion: audit.k8s.io/v1
+kind: Policy
+omitStages: [“RequestReceived”]
+rules: 
+namespaces: [“prod-namespace”]
+verb: [“delete”]
+resources: 
+groups: “”
+resources: [“pods”]
+resourceNames: [“webapp-pod”]
+level: (None, Metadata, Request & RequestResponse)
+resources:
+groups: “”
+resources: [“secrets”]
+
+Auditing is disabled by default!!
+
+Update:
+/etc/kubernetes/manifests/kube-apiserver.yaml
+Add: ‘—audit-policy-file=<file>’
+Add volume/VolumeMount with audit file to the YAML
+
+

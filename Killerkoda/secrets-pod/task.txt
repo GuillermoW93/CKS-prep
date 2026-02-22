@@ -1,0 +1,9 @@
+Create a Secret named holy with content creditcard=1111222233334444
+Create Secret from file /opt/ks/secret-diver.yaml
+
+------
+
+Create a Pod named pod1 of image nginx
+Make Secret holy available as environment variable HOLY
+Mount Secret diver as volume. The file should be available under /etc/diver/hosts .
+Test env+volume access in the running Pod

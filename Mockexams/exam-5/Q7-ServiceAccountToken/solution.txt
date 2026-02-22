@@ -1,0 +1,32 @@
+# Create ServiceAccount that does not automount the token by default
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: minimal-sa
+  namespace: service-account-caution
+automountServiceAccountToken: false
+
+# Deployment that uses the ServiceAccount
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secure-app
+  namespace: service-account-caution
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: secure-app
+  template:
+    metadata:
+      labels:
+        app: secure-app
+    spec:
+      serviceAccountName: minimal-sa
+      automountServiceAccountToken: false
+      containers:
+        - name: nginx
+          image: nginx:stable
+

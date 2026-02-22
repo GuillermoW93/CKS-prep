@@ -1,0 +1,34 @@
+/opt/ks$ docker build -t base-image .
+
+docker run --name c1 base-image
+
+docker ps
+CONTAINER ID   IMAGE        COMMAND                  CREATED              STATUS              PORTS     NAMES
+1d94b9ec3233   base-image   "/bin/sh -c 'sh -c '…"   About a minute ago   Up About a minute             c1
+controlplane:/opt/ks$ docker exec -it 1d94b9ec3233 sh
+/ # whoami
+root
+/ # ps
+PID   USER     TIME  COMMAND
+    1 root      0:00 sleep 1d
+    8 root      0:00 sh
+   15 root      0:00 ps
+
+-----
+
+FROM alpine:3.12.3
+
+RUN adduser -D -g '' appuser
+
+USER appuser
+
+CMD sh -c 'sleep 1d'
+
+docker exec -it c2 ps
+PID   USER     TIME  COMMAND
+    1 appuser   0:00 sleep 1d
+    7 appuser   0:00 ps
+
+controlplane:/opt/ks$ docker exec -it c2 sh
+/ $ whoami
+appuser

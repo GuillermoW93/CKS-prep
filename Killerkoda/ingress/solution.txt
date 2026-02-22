@@ -1,0 +1,51 @@
+k get deployment -n world
+NAME     READY   UP-TO-DATE   AVAILABLE   AGE
+asia     2/2     2            2           87s
+europe   2/2     2            2           87s
+
+controlplane:~$ k expose deployment/asia -n world --port=80
+service/asia exposed
+
+controlplane:~$ k expose deployment/europe -n world --port=80
+service/europe exposed
+
+controlplane:~$ k get svc -n world
+NAME     TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+asia     ClusterIP   10.106.151.121   <none>        80/TCP    12s
+europe   ClusterIP   10.101.118.35    <none>        80/TCP    5s
+
+-----
+k get ingressclasses.networking.k8s.io 
+NAME    CONTROLLER             PARAMETERS   AGE
+nginx   k8s.io/ingress-nginx   <none>       5m50s
+
+  1 apiVersion: networking.k8s.io/v1
+  2 kind: Ingress
+  3 metadata:
+  4   name: world
+  5   namespace: world
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+  6 spec:
+      ingressClassName: nginx
+  7   rules:
+  8   - host: "world.universe.mine"
+  9     http:
+ 10       paths:
+ 11       - pathType: Prefix
+ 12         path: "/europe"
+ 13         backend:
+ 14           service:
+ 15             name: europe
+ 16             port:
+ 17               number: 80
+ 18   - host: "world.universe.mine"
+ 19     http:
+ 20       paths:
+ 21       - pathType: Prefix
+ 22         path: "/asia"
+ 23         backend:
+ 24           service:
+ 25             name: asia
+ 26             port:
+ 27               number: 80

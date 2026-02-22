@@ -1,0 +1,9 @@
+The idea here is to misconfigure the Apiserver in different ways, then check possible log locations for errors.
+
+Change the existing Apiserver manifest argument to: --etcd-servers=this-is-very-wrong .
+
+Check what the logs say, without using anything in /var .
+
+Fix the Apiserver again..
+
+

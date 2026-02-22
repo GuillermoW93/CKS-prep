@@ -1,0 +1,16 @@
+# Question
+
+Create a service account named "seminar-sa" on the namespace "seminar"
+
+Create a new role named "k8s-seminar" in the namespace "seminar" which only allows "create and update" operations only on resources of type "pods" and "deployments"
+
+Create a new rolebinding name "k8s-seminar-bind" binding to the newly created role to the service account created previously named "seminar-sa".
+
+# Solution
+
+k create sa seminar-sa -n seminar
+
+k create role k8s-seminar -n seminar --verb=create,update --resources=pods,deployment
+
+k create rolebinding k8s-seminar-bind --role=k8s-seminar --serviceaccount=seminar:seminar-sa -n seminar
+

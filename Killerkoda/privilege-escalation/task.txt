@@ -1,0 +1,5 @@
+There is a Deployment named logger which constantly outputs the NoNewPrivs flag.
+
+Let the Pods of that Deployment run with Privilege Escalation disabled.
+
+The logs should show the field change.
