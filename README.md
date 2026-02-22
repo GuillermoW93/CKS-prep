@@ -4,6 +4,8 @@ This repository contains a collection of practical, hands-on scenarios designed 
 
 These exercises are built for a self-hosted `kubeadm` cluster (e.g., running on Proxmox with Istio/Cilium) and cover the core domains of the CKS curriculum, from cluster setup and hardening to runtime security.
 
+This entire repository consists of summarys from Killerkoda/KodeKloud and a lot of mockexam questions. Best of luck! :) 
+
 ## Table of Contents
 1. [Admission Controllers (ImagePolicyWebhook & NodeRestriction)](#1-admission-controllers)
 2. [Kubeadm Node Upgrade](#2-kubeadm-node-upgrade)
