@@ -1,0 +1,36 @@
+vi /etc/falco/falco_rules.local.yaml
+
+- list: mem_file
+  items: [/dev/mem]
+- rule: devmem
+  desc: "Check access /dev/mem"
+  condition: >
+    fd.name in (mem_file)
+  output: >
+    Shell (container_id=%container.id)
+  priority: NOTICE
+
+Test by running: “k exec -it <pod> — cat /dev/mem” 
+- cat: /dev/mem: No such file or directory
+
+falco -M 30 -r /etc/falco/falco_rules.local.yaml 
+
+ontrolplane:~$ falco -M 30 -r /etc/falco/falco_rules.local.yaml 
+Fri Feb 27 16:51:01 2026: Falco version: 0.42.1 (x86_64)
+Fri Feb 27 16:51:01 2026: Falco initialized with configuration files:
+Fri Feb 27 16:51:01 2026:    /etc/falco/config.d/engine-kind-falcoctl.yaml | schema validation: ok
+Fri Feb 27 16:51:01 2026:    /etc/falco/config.d/falco.container_plugin.yaml | schema validation: ok
+Fri Feb 27 16:51:01 2026:    /etc/falco/falco.yaml | schema validation: ok
+Fri Feb 27 16:51:01 2026: One ring buffer every '1' CPUs.
+Fri Feb 27 16:51:01 2026: [libs]: Trying to open the right engine!
+16:51:05.277211499: Notice Shell (container_id=357b454c58a9) container_id=357b454c58a9 container_name=test-falco container_image_repository=docker.io/library/nginx container_image_tag=latest k8s_pod_name=test-falco k8s_ns_name=default
+16:51:06.268606167: Notice Shell (container_id=357b454c58a9) container_id=357b454c58a9 container_name=test-falco container_image_repository=docker.io/library/nginx container_image_tag=latest k8s_pod_name=test-falco k8s_ns_name=default
+Syscall event drop monitoring:
+   - event drop detected: 0 occurrences
+   - num times actions taken: 0
+Events detected: 2
+Rule counts by severity:
+   NOTICE: 2
+Triggered rules by rule name:
+   devmem: 2
+controlplane:~$ 
