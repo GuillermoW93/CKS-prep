@@ -1,0 +1,78 @@
+
+In this endpoint-based network policy, we lock down database
+namespace to only allow incoming traffic from backend Pod in web
+namespace
+
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lockdown-database
+  namespace: database
+spec:
+# Empty selector matches all pods in the namespace
+  endpointSelector: {}
+  ingress:
+  - fromEndpoints:
+  # Allow all Pods in same namespace and backend Pod in web namespace
+    - matchLabels: {}
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: web
+        app: backend
+        # No egress field means allow all outgoing traffic from namespace
+
+----
+
+In this endpoint-based network policy, we further lock down database
+namespace to ONLY allow incoming MySQL traffic from backend Pod in
+web namespace and ONLY allow outgoing DNS traffic to kube-dns Pod in
+kube-system namespace.
+
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: lockdown-database
+  namespace: database
+spec:
+  # Applies to all pods in database namespace
+  endpointSelector: {}
+  # Allow incoming traffic only from backend pods in web namespace
+  ingress:
+  - fromEndpoints:
+    - matchLabels: {}
+    - matchLabels:
+        k8s:io.kubernetes.pod.namespace: web
+        app: backend
+    toPorts:
+    - ports:
+      - port: "3306"
+        protocol: TCP
+    # Allow outgoing DNS traffic only to kube-dns
+    egress:
+    - toEndpoints:
+      - matchLabels:
+          k8s:io.kubernetes.pod.namespace: kube-system
+          k8s-app: kube-dns
+      toPorts:
+      - ports:
+        - port: "53"
+          protocol: UDP
+        - port: "53"
+          protocol: TCP
+
+----
+
+In this entities-based network policy, we allow all endpoints with the
+label env=dev to access the kube-apiserver
+
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: dev-to-kube-apiserver
+spec:
+  endpointSelector:
+    matchLabels:
+      env: dev
+  egress:
+    - toEntities:
+      - kube-apiserver
+
