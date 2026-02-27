@@ -1,0 +1,28 @@
+First, let's intentionally make the node vulnerable by enabling IP forwarding dynamically. Run this command to set the stage:
+
+sysctl -w net.ipv4.ip_forward=1
+
+A recent security audit flagged the controlplane node for acting as a router.
+
+Disable IPv4 forwarding on the current node.
+
+Ensure this configuration is applied immediately to the live system.
+
+Ensure the configuration is persistent across node reboots.
+
+----
+
+controlplane:~$ cat /etc/sysctl.conf | grep ip_forward
+#net.ipv4.ip_forward=1
+
+controlplane:~$ vi /etc/sysctl.conf 
+
+controlplane:~$ cat /etc/sysctl.conf | grep ip_forward
+#net.ipv4.ip_forward=0
+
+-p[FILE], --load[=FILE]
+              Load in sysctl settings from the file specified or /etc/sysctl.conf if none given.  Specifying - as filename means reading data from standard input. Using this option will mean  arguments
+              to sysctl are files, which are read in the order they are specified.  The file argument may be specified as regular expression.
+
+**By running 'sysctl -p' it reloads default config!**
+

@@ -1,0 +1,17 @@
+Let's spin up a dummy pod and create a mock tarball directory so you can practice the workflow.
+
+kubectl run kiwi --image=nginx:1.21.6
+mkdir -p /root/image-archive
+# In the real exam, the actual image tarballs will be here. 
+# We will just create a dummy file for syntax practice.
+touch /root/image-archive/nginx_1.21.6.tar
+
+--
+
+Solution
+
+bom generate --image-archive /root/image-archive/nginx_1.21.6.tar --format json --output /root/kiwi-sbom.spdx
+
+INFO bom v0.7.1: Generating SPDX Bill of Materials 
+INFO Processing image archive /root/image-archive/nginx_1.21.6.tar 
+FATA generating doc: scanning image archives: generating tarball package: extracting tarball to temp dir: sampling bytes from file header: EOF 

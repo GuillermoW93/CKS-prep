@@ -1,0 +1,29 @@
+Ensure that the Kubelet on the controlplane node:
+
+Disables anonymous authentication.
+
+Delegates authorization decisions to the API server (Webhook).
+
+---
+
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    cacheTTL: 0s
+    enabled: true
+  x509:
+    clientCAFile: /etc/kubernetes/pki/ca.crt
+authorization:
+  mode: Webhook
+  webhook:
+    cacheAuthorizedTTL: 0s
+    cacheUnauthorizedTTL: 0s
+
+Make sure to enable "authentication.anonymous to be **False** the same goes for authorization.mode should be **Webhook**"
+
+By renaming/deleting the default ~/.kube/config file (or unsetting the $KUBECONFIG environment variable) kubectl has no idea how to talk to the API server unless you explicitly feed it the path using --kubeconfig=/path/to/custom/admin.conf.
+- e.g. **kubectl --kubeconfig=/path/to/custom/admin.conf get pods**
+
+Always run **sudo systemctl restart kubelet** to apply the changes!

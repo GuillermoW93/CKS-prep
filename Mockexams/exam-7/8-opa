@@ -1,0 +1,85 @@
+First, we need to install Gatekeeper and deploy the base template. Copy and paste this massive block. It will install Gatekeeper, wait for it to be ready, and then deploy a ConstraintTemplate that checks for missing labels.
+
+# 1. Install Gatekeeper
+kubectl apply -f https://raw.githubusercontent.com/open-policy-agent/gatekeeper/release-3.14/deploy/gatekeeper.yaml
+
+# Wait for it to spin up (might take ~30 seconds)
+kubectl wait --for=condition=Ready -l control-plane=controller-manager pod -n gatekeeper-system --timeout=90s
+
+# 2. Deploy the ConstraintTemplate
+cat <<EOF | kubectl apply -f -
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8srequiredlabels
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sRequiredLabels
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8srequiredlabels
+        violation[{"msg": msg, "details": {"missing_labels": missing}}] {
+          provided := {label | input.review.object.metadata.labels[label]}
+          required := {label | label := input.parameters.labels[_]}
+          missing := required - provided
+          count(missing) > 0
+          msg := sprintf("you must provide labels: %v", [missing])
+        }
+EOF
+
+----
+
+The cluster administrator wants to enforce a strict tagging policy.
+
+Create a Constraint using the K8sRequiredLabels kind (which we just created above).
+
+Name the constraint require-env-label.
+
+It must enforce that ALL newly created Namespaces must have the label env (the value doesn't matter, just the key).
+
+----
+
+Reference: https://open-policy-agent.github.io/gatekeeper/website/docs/howto/
+
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sRequiredLabels
+metadata:
+  name: require-env-label
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Namespace"]
+  parameters:
+    labels: ["env"]
+
+controlplane:~$ k create ns test-good --dry-run=client -o yaml > ns.yaml
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-good
+  labels:
+    env: test
+
+controlplane:~$ k apply -f ns.yaml 
+namespace/test-good created
+
+controlplane:~$ k create ns test-bad
+Error from server (Forbidden): admission webhook "validation.gatekeeper.sh" denied the request: [require-env-label] you must provide labels: {"env"}
+
+controlplane:~$ k get constraints -A
+NAME                ENFORCEMENT-ACTION   TOTAL-VIOLATIONS
+require-env-label                        8
+controlplane:~$ 

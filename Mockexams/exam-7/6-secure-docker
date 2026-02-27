@@ -1,0 +1,116 @@
+Imagine a node where the Docker daemon is currently running, but it's bound to an external TCP port and isn't explicitly running under the root group.
+
+Your Task:
+
+Ensure that the Docker daemon runs under the root group.
+
+Ensure that no external TCP connections are allowed to the Docker daemon.
+
+Ensure the configuration is persistent across restarts.
+
+---
+
+controlplane:~$ systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-02-27 17:52:58 UTC; 2h 7min ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 1025 (dockerd)
+      Tasks: 8
+     Memory: 43.0M (peak: 93.6M)
+        CPU: 1.448s
+     CGroup: /system.slice/docker.service
+             └─1025 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+
+cat /usr/lib/systemd/system/docker.service
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target firewalld.service containerd.service
+Wants=network-online.target
+Requires=docker.socket
+Wants=containerd.service
+
+[Service]
+Type=notify
+# the default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by docker
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+ExecReload=/bin/kill -s HUP $MAINPID
+TimeoutSec=0
+RestartSec=2
+Restart=always
+
+
+I will add --group=root after ExecStart= fd:// , so like this: ExecStart=/usr/bin/dockerd -H fd:// --group=root --containerd=/run/containerd/containerd.sock
+
+Next, systemctl daemon-reload, systemctl restart docker && systemctl status docker
+
+systemctl status docker
+● docker.service - Docker Application Container Engine
+     Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; preset: enabled)
+     Active: active (running) since Fri 2026-02-27 20:02:22 UTC; 1s ago
+TriggeredBy: ● docker.socket
+       Docs: https://docs.docker.com
+   Main PID: 67431 (dockerd)
+      Tasks: 8
+     Memory: 63.3M (peak: 63.6M)
+        CPU: 538ms
+     CGroup: /system.slice/docker.service
+             └─67431 /usr/bin/dockerd -H fd:// --group=root --containerd=/run/containerd/containerd.sock
+
+Next, edit /etc/docker/daemon.json
+
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "log-driver": "json-file",
+  "storage-driver": "overlay2",
+  "registry-mirrors": ["https://mirror.gcr.io","https://docker-mirror.killercoda.com","https://docker-mirror.killer.sh"],
+  "mtu": 1454
+}
+
+Delete the entry: "tcp://0.0.0.0:2375", next systemctl daemon-reload, systemctl restart docker 
+
+ps aux | grep dockerd
+root       67431  0.2  3.0 1824352 71040 ?       Ssl  20:02   0:00 /usr/bin/dockerd -H fd:// --group=root --containerd=/run/containerd/containerd.sock
+root       68821  0.0  0.0   3528  1792 pts/0    S+   20:04   0:00 grep --color=auto dockerd
+
+controlplane:~$ netstat -tulp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 127.0.0.54:domain       0.0.0.0:*               LISTEN      2253/systemd-resolv 
+tcp        0      0 localhost:2381          0.0.0.0:*               LISTEN      1848/etcd           
+tcp        0      0 localhost:2379          0.0.0.0:*               LISTEN      1848/etcd           
+tcp        0      0 localhost:10259         0.0.0.0:*               LISTEN      1834/kube-scheduler 
+tcp        0      0 localhost:10257         0.0.0.0:*               LISTEN      1875/kube-controlle 
+tcp        0      0 localhost:10249         0.0.0.0:*               LISTEN      2845/kube-proxy     
+tcp        0      0 localhost:10248         0.0.0.0:*               LISTEN      1537/kubelet        
+tcp        0      0 0.0.0.0:40200           0.0.0.0:*               LISTEN      2038/kc-terminal    
+tcp        0      0 0.0.0.0:40205           0.0.0.0:*               LISTEN      1708/node           
+tcp        0      0 127.0.0.53:domain       0.0.0.0:*               LISTEN      2253/systemd-resolv 
+tcp        0      0 localhost:9099          0.0.0.0:*               LISTEN      3586/calico-node    
+tcp        0      0 localhost:ipp           0.0.0.0:*               LISTEN      883/cupsd           
+tcp        0      0 localhost:43751         0.0.0.0:*               LISTEN      886/containerd      
+tcp        0      0 0.0.0.0:ssh             0.0.0.0:*               LISTEN      1/init              
+tcp        0      0 172.30.1.2:2379         0.0.0.0:*               LISTEN      1848/etcd           
+tcp        0      0 172.30.1.2:2380         0.0.0.0:*               LISTEN      1848/etcd           
+tcp6       0      0 ip6-localhost:ipp       [::]:*                  LISTEN      883/cupsd           
+tcp6       0      0 [::]:40305              [::]:*                  LISTEN      2010/runtime-info-s 
+tcp6       0      0 [::]:40300              [::]:*                  LISTEN      1540/runtime-scenar 
+tcp6       0      0 [::]:31646              [::]:*                  LISTEN      2845/kube-proxy     
+tcp6       0      0 [::]:6443               [::]:*                  LISTEN      1768/kube-apiserver 
+tcp6       0      0 [::]:10256              [::]:*                  LISTEN      2845/kube-proxy     
+tcp6       0      0 [::]:ssh                [::]:*                  LISTEN      1/init              
+tcp6       0      0 [::]:10250              [::]:*                  LISTEN      1537/kubelet        
+udp        0      0 127.0.0.54:domain       0.0.0.0:*                           2253/systemd-resolv 
+udp        0      0 127.0.0.53:domain       0.0.0.0:*                           2253/systemd-resolv 
+udp        0      0 172.30.1.2:bootpc       0.0.0.0:*                           1490/dhcpcd: [BOOTP 
+udp        0      0 172.30.1.2:bootpc       0.0.0.0:*                           482/systemd-network 
+udp        0      0 0.0.0.0:4789            0.0.0.0:*                           -                   
+udp        0      0 0.0.0.0:54306           0.0.0.0:*                           614/avahi-daemon: r 
+udp        0      0 0.0.0.0:mdns            0.0.0.0:*                           614/avahi-daemon: r 
+udp6       0      0 [::]:49058              [::]:*                              614/avahi-daemon: r 
+udp6       0      0 fe80::c9c:dhcpv6-client [::]:*                              1026/dhcpcd: [DHCP6 
+udp6       0      0 [::]:mdns               [::]:*                              614/avahi-daemon: r                     

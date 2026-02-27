@@ -1,0 +1,23 @@
+Disabling Service Exposure
+
+The Objective: Prevent external access to a service (nginx-external) that should only be internal.
+
+To restrict access to within the cluster only, edit the service (kubectl edit svc nginx-external) and change type: NodePort to type: ClusterIP.
+
+---
+
+kubectl create namespace system-hardening
+kubectl create deployment nginx --image=nginx -n system-hardening
+kubectl expose deployment nginx --name=nginx-external-service --port=80 --type=NodePort -n system-hardening
+
+k get svc -n system-hardening 
+NAME                     TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
+nginx-external-service   NodePort   10.97.93.134   <none>        80:31954/TCP   3s
+
+k edit svc -n system-hardening 
+service/nginx-external-service edited
+- delete all the NodeIP stuff and replace with ClusterIP
+
+k get svc -n system-hardening 
+NAME                     TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+nginx-external-service   ClusterIP   10.97.93.134   <none>        80/TCP    106s

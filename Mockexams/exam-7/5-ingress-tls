@@ -1,0 +1,74 @@
+Let's create the dummy backend service and namespace first so your Ingress has somewhere to point.
+
+kubectl create namespace rocket
+kubectl create deployment rocket-server --image=nginx -n rocket
+kubectl expose deployment rocket-server --port=80 -n rocket
+
+
+Your Task:
+Based on the exam screenshot, you need to create an Ingress resource with the following specifications:
+
+Name: rocket-ingress
+
+Namespace: rocket
+
+Annotation: Enforce SSL redirection (nginx.ingress.kubernetes.io/ssl-redirect: "true")
+
+Ingress Class: nginx
+
+Routing Rules:
+
+Host: rocket-server.local
+
+Path: / (Prefix)
+
+Backend Service: rocket-server on port 80
+
+----
+
+k create secret tls secret-tls -n rocket --key=/var/lib/kubelet/pki/kubelet.key --cert=/var/lib/kubelet/pki/
+kubelet.crt 
+secret/secret-tls created
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rocket-ingress
+  namespace: rocket
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+      - rocket-server.local
+    secretName: secret-tls
+  rules:
+  - host: rocket-server.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rocket-server
+            port:
+              number: 80
+
+kubectl get svc -n ingress-nginx
+NAME                                 TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+ingress-nginx-controller             LoadBalancer   10.111.73.103    <pending>     80:32627/TCP,443:30948/TCP   87s
+ingress-nginx-controller-admission   ClusterIP      10.105.244.174   <none>        443/TCP                      87s
+
+curl -kv --resolve rocket-server.local:30948:172.30.1.2 https://rocket-server.local:30948
+* Added rocket-server.local:30948:172.30.1.2 to DNS cache
+* Hostname rocket-server.local was found in DNS cache
+*   Trying 172.30.1.2:30948...
+* Connected to rocket-server.local (172.30.1.2) port 30948
+* ALPN: curl offers h2,http/1.1
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.3 (IN), TLS handshake, Encrypted Extensions (8):
+* TLSv1.3 (IN), TLS handshake, Certificate (11):
+
+**curl --resolve example.com:443:127.0.0.1 https://example.com**

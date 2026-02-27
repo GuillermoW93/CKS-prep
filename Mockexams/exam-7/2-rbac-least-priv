@@ -1,0 +1,68 @@
+Restricting Namespace Access (RBAC)
+
+Copy and paste this block to create the dev-z namespace, a dummy user (jacob), and a Role that currently gives him way too much power (full access to all pod operations).
+
+kubectl create ns dev-z
+
+cat <<EOF | kubectl apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: dev-z
+  name: dev-user-access
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["*"]
+EOF
+
+kubectl create rolebinding dev-user-binding -n dev-z --role=dev-user-access --user=jacob
+
+To verify the current (bad) state, you can check what Jacob can do. He can currently delete pods, which he shouldn't be able to do:
+ - kubectl auth can-i delete pods -n dev-z --as=jacob
+
+ ---
+
+Your Task:
+Jacob should only have the following permissions in the dev-z namespace:
+
+get, list, and watch on pods.
+
+get and list on configmaps.
+
+No access at all to secrets.
+
+Update the permissions to secure Jacob's access. You can edit the existing dev-user-access role.
+
+Solution:
+
+controlplane:~$ k get role -n dev-z -o yaml
+apiVersion: v1
+items:
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: dev-user-access
+    namespace: dev-z
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - pods
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    resources:
+    - configmaps
+    verbs:
+    - get
+    - list
+kind: List
+metadata:
+  resourceVersion: ""
+
+controlplane:~$ kubectl auth can-i delete pods -n dev-z --as=jacob
+no
